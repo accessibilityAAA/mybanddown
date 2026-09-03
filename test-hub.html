@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 全站工具智慧自動偵測測試中心 - 買便當 mybanddown</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0c0a09; color: #f5f5f4; padding: 30px; margin: 0; }
+        .test-container { max-width: 1100px; margin: 0 auto; }
+        h1 { color: #fb923c; margin-bottom: 5px; }
+        p { color: #a8a29e; font-size: 0.95rem; }
+        .summary-bar { display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
+        .summary-box { background: #1c1917; border: 1px solid #44403c; padding: 12px 20px; border-radius: 8px; font-size: 0.95rem; }
+        .summary-box strong { color: #fb923c; font-size: 1.2rem; }
+        table { width: 100%; border-collapse: collapse; background: #1c1917; border-radius: 8px; overflow: hidden; margin-top: 15px; }
+        th, td { border: 1px solid #292524; padding: 12px 16px; text-align: left; }
+        th { background: #292524; color: #38bdf8; font-size: 0.95rem; }
+        code { background: #0c0a09; padding: 3px 8px; border-radius: 4px; color: #f43f5e; font-family: monospace; }
+        a { color: #38bdf8; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: bold; display: inline-block; }
+        .status-ok { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid #4ade80; }
+        .status-dev { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid #f87171; }
+        .status-checking { background: rgba(250, 204, 21, 0.15); color: #facc15; border: 1px solid #facc15; }
+    </style>
+</head>
+<body>
+
+    <div class="test-container">
+        <h1>🧪 買便當 mybanddown - 全站自動透視測試中心</h1>
+        <p>重新整理或按 F5，系統將自動透視實體 `.html` 檔案是否存在（相容 `file://` 本機開檔與 Live Server 雙軌環境）。</p>
+
+        <div class="summary-bar">
+            <div class="summary-box">總頁面數：<strong id="count-total">0</strong></div>
+            <div class="summary-box">實體檔案存在 (已上線)：<strong id="count-ok" style="color:#4ade80;">0</strong></div>
+            <div class="summary-box">未建立檔案 (開發中)：<strong id="count-dev" style="color:#f87171;">0</strong></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>編號 / 檔名</th>
+                    <th>頁面名稱</th>
+                    <th>實時偵測狀態</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="test-table-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const ALL_PAGES = [
+            // 00 系統與公共頁面
+            { file: "index.html", name: "首頁 (買便當工具大廳)" },
+            { file: "privacy.html", name: "隱私權及安全政策" },
+            { file: "terms.html", name: "服務條款" },
+            { file: "sitemap.html", name: "網站導覽 (Sitemap)" },
+            { file: "test-hub.html", name: "測試中心 (本頁)" },
+
+            // 01 隨機與決定類
+            { file: "01-101-wheel.html", name: "幸運轉盤抽籤工具" },
+            { file: "01-102-random-picker.html", name: "隨機抽籤與紙牌選人" },
+            { file: "01-103-random-group.html", name: "隨機團隊分組工具" },
+            { file: "01-104-random-sort.html", name: "隨機排序產生器" },
+            { file: "01-105-coin-dice.html", name: "3D 線上擲硬幣 / 擲骰子 / 擲筊" },
+            { file: "01-106-number-gen.html", name: "隨機亂數號碼產生器" },
+
+            // 02 文字與符號類
+            { file: "02-201-char-count.html", name: "線上字數統計與文字分析器" },
+            { file: "02-202-symbols.html", name: "特殊符號與顏文字一鍵複製" },
+            { file: "02-203-fancy-text.html", name: "酷文字產生器 (泡泡字/草書)" },
+            { file: "02-204-qrcode-gen.html", name: "線上 QR Code 條碼產生器" },
+            { file: "02-205-barcode-gen.html", name: "線上條碼 (Barcode) 產生器" },
+            { file: "02-206-full-half-width.html", name: "全形 / 半形文字一鍵轉換" },
+
+            // 03 PDF 文檔處理類
+            { file: "03-301-pdf-print-layout.html", name: "PDF 列印工具 (多頁併頁/證件影本)" },
+
+            // 04 圖片與多媒體類
+            { file: "04-405-heic-webp-convert.html", name: "HEIC & WebP 轉 JPG/PNG 轉檔器" },
+            { file: "04-406-video-tools.html", name: "線上影片剪輯/轉 GIF 與螢幕錄影" },
+
+            // 05 實用計算類
+            { file: "05-501-tax-invoice.html", name: "手寫發票與營業稅計算機" },
+            { file: "05-503-unit-converter.html", name: "萬用單位換算器與實物直尺" },
+
+            // 06 時間與生活安全類
+            { file: "06-601-password-gen.html", name: "隨機密碼與亂數號碼產生器" },
+            { file: "06-603-digital-clock.html", name: "全螢幕時鐘與番茄鐘計時器" },
+            { file: "06-607-lunar-calendar.html", name: "農民曆查詢與國農曆對照" },
+            { file: "06-608-scoreboard.html", name: "實用生活小工具箱 (計分/測速)" },
+
+            // 07 交通路線與參考類
+            { file: "07-701-mrt-taipei.html", name: "全台捷運與輕軌路線圖參考" },
+            { file: "07-707-highway-toll.html", name: "國道計程地圖與即時空氣品質 (AQI)" }
+        ];
+
+        let okCount = 0;
+        let devCount = 0;
+
+        function checkFileExistsSmart(filePath) {
+            return new Promise((resolve) => {
+                if (window.location.protocol.startsWith('http')) {
+                    fetch(filePath, { method: 'HEAD' })
+                        .then(res => resolve(res.ok))
+                        .catch(() => resolve(false));
+                    return;
+                }
+
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                let hasResponded = false;
+
+                iframe.onload = function () {
+                    if (hasResponded) return;
+                    hasResponded = true;
+                    if (iframe.parentNode) document.body.removeChild(iframe);
+                    resolve(true);
+                };
+
+                iframe.onerror = function () {
+                    if (hasResponded) return;
+                    hasResponded = true;
+                    if (iframe.parentNode) document.body.removeChild(iframe);
+                    resolve(false);
+                };
+
+                setTimeout(() => {
+                    if (!hasResponded) {
+                        hasResponded = true;
+                        if (iframe.parentNode) document.body.removeChild(iframe);
+                        resolve(false);
+                    }
+                }, 300);
+
+                iframe.src = filePath;
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function initRealCheck() {
+            const tbody = document.getElementById('test-table-body');
+            if (!tbody) return;
+
+            document.getElementById('count-total').innerText = ALL_PAGES.length;
+
+            let initialHtml = '';
+            ALL_PAGES.forEach((item, index) => {
+                initialHtml += `
+                    <tr id="row-${index}">
+                        <td><code>${item.file}</code></td>
+                        <td>${item.name}</td>
+                        <td class="status-cell"><span class="status-badge status-checking">🔍 偵測檔案中...</span></td>
+                        <td class="action-cell">...</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = initialHtml;
+
+            for (let i = 0; i < ALL_PAGES.length; i++) {
+                const item = ALL_PAGES[i];
+                const exists = await checkFileExistsSmart(item.file);
+                
+                const row = document.getElementById(`row-${i}`);
+                if (!row) continue;
+
+                const statusCell = row.querySelector('.status-cell');
+                const actionCell = row.querySelector('.action-cell');
+
+                if (exists) {
+                    okCount++;
+                    statusCell.innerHTML = `<span class="status-badge status-ok">✓ 檔案存在 (已上線)</span>`;
+                    actionCell.innerHTML = `<a href="${item.file}" target="_blank">🔗 新分頁測試</a>`;
+                } else {
+                    devCount++;
+                    statusCell.innerHTML = `<span class="status-badge status-dev">✕ 缺檔 (開發中)</span>`;
+                    actionCell.innerHTML = `<a href="#" onclick="alert('尚未建立 【${item.file}】 檔案！'); return false;" style="color:#78716c;">🚧 暫無法測試</a>`;
+                }
+
+                document.getElementById('count-ok').innerText = okCount;
+                document.getElementById('count-dev').innerText = devCount;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initRealCheck);
+    </script>
+</body>
+</html>

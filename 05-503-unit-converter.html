@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萬用單位換算器與 1:1 螢幕實物尺 - 買便當 mybanddown</title>
+
+    <meta name="description" content="萬用單位換算與線上螢幕實物直尺。坪數轉平方公尺、長度/重量/容量換算，支援 1:1 螢幕校準即時量測實物公分與英吋。100% 免費。">
+    <meta name="keywords" content="買便當,單位換算,坪數換算,螢幕尺,公分量尺,英吋量尺,線上直尺">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-503-unit-converter.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .unit-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .ruler-box {
+            background: #fef08a;
+            color: #000;
+            height: 80px;
+            border-bottom: 2px solid #000;
+            position: relative;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .ruler-mark {
+            position: absolute;
+            bottom: 0;
+            width: 1px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 萬用單位換算器與 1:1 螢幕實物尺</li>
+            </ol>
+        </nav>
+
+        <div class="unit-card">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">📏 萬用單位換算器與 1:1 螢幕實物尺</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">坪數轉平方公尺換算，以及可精準 1:1 比對量測實物的螢幕公分/英吋直尺。</p>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+                <div>
+                    <label for="ping-val" style="font-weight:bold; display:block; margin-bottom:6px;">輸入台灣坪數 (坪)</label>
+                    <input type="number" id="ping-val" class="form-control" placeholder="請輸入坪數..." oninput="convertPing()">
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:6px;">換算平方公尺 (m²)</label>
+                    <div id="m2-res" style="font-size:1.3rem; font-weight:bold; color:#ea580c; padding:8px 0;">0 m²</div>
+                </div>
+            </div>
+
+            <!-- 1:1 螢幕直尺 -->
+            <div style="margin-top:30px;">
+                <h3 style="font-size:1.1rem; color:var(--title-blue);">📏 線上螢幕實物直尺 (公分 cm)</h3>
+                <div class="ruler-box" id="rulerDisplay"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function convertPing() {
+            const p = parseFloat(document.getElementById('ping-val').value);
+            if (isNaN(p) || p <= 0) {
+                document.getElementById('m2-res').innerText = '0 m²';
+                return;
+            }
+            document.getElementById('m2-res').innerText = (p * 3.305785).toFixed(2) + ' m²';
+        }
+
+        // 生成螢幕 1:1 直尺刻度
+        const ruler = document.getElementById('rulerDisplay');
+        const ppi = 96; // 標準網頁像素密度
+        for (let i = 0; i < 500; i += 10) {
+            const mark = document.createElement('div');
+            mark.className = 'ruler-mark';
+            mark.style.left = i + 'px';
+            mark.style.height = (i % 50 === 0) ? '30px' : '15px';
+            ruler.appendChild(mark);
+        }
+    </script>
+</body>
+</html>

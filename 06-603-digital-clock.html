@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全螢幕數位時鐘與番茄鐘專注法 - 買便當 mybanddown</title>
+
+    <meta name="description" content="極簡全螢幕數字時鐘與番茄鐘 25/5 專注工作法計時器，附帶台灣 117 語音報時。適合簡報投影與副螢幕時間擺設。100% 免費。">
+    <meta name="keywords" content="買便當,數字時鐘,全螢幕時鐘,番茄鐘,117報時台,專注計時器,鬧鐘">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/06-603-digital-clock.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .clock-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+        .clock-time-display {
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            color: #ea580c;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 全螢幕數位時鐘與番茄鐘</li>
+            </ol>
+        </nav>
+
+        <div class="clock-card" id="clockCard">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">🕒 全螢幕數位時鐘與番茄鐘專注法</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">大數字清晰時間顯示，專為辦公室副螢幕與課堂投影幕設計。</p>
+
+            <div class="clock-time-display" id="clockText">00:00:00</div>
+
+            <div>
+                <button type="button" class="tag-btn" onclick="document.getElementById('clockCard').requestFullscreen()">📺 進入全螢幕滿版模式</button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clockText').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

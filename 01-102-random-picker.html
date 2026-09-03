@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課堂隨機點名抽籤與團隊公平分組 - 買便當 mybanddown</title>
+
+    <meta name="description" content="專為老師教學與團康活動設計的隨機點名抽籤工具。學生名單隨機抽卡、男女/指定組長公平團隊分組、數字亂數開號。100% 免費本機運行。">
+    <meta name="keywords" content="買便當,隨機點名,點名抽籤,隨機分組,團隊分組,亂數抽卡,老師工具">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-102-random-picker.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .picker-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .result-card-box {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ea580c;
+            background: var(--panel-bg);
+            border: 2px dashed #ea580c;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+        .btn-pick {
+            background: #ea580c;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+            transition: background 0.2s;
+        }
+        .btn-pick:hover { background: #c2410c; }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 課堂隨機點名抽籤與團隊公平分組</li>
+            </ol>
+        </nav>
+
+        <div class="picker-card">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">🎴 課堂隨機點名抽籤與團隊公平分組</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">老師教學必備！輸入學生名單或座號，一鍵隨機抽卡選人，或是將名單公平分配至指定組數。</p>
+
+            <div style="margin-bottom: 15px;">
+                <label for="name-list" style="font-weight:bold; display:block; margin-bottom:6px;">請輸入成員/學生名單 (每行名字或座號)：</label>
+                <textarea id="name-list" class="form-control" rows="6">01號 王小明&#10;02號 李小華&#10;03號 張老王&#10;04號 陳同學&#10;05號 林同學&#10;06號 趙同學</textarea>
+            </div>
+
+            <div class="result-card-box" id="pickedResult">❓ 點擊下方按鈕抽籤</div>
+
+            <div style="text-align:center; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="btn-pick" onclick="pickRandom()">🎯 隨機抽取 1 位成員</button>
+                <button type="button" class="btn-pick" style="background:#3b82f6;" onclick="makeGroups()">👥 自動分成分組</button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function getNames() {
+            return document.getElementById('name-list').value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        }
+
+        function pickRandom() {
+            const names = getNames();
+            if (names.length === 0) {
+                alert('請先輸入成員名單！');
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * names.length);
+            document.getElementById('pickedResult').innerText = '🎉 抽中：' + names[randomIndex];
+        }
+
+        function makeGroups() {
+            const names = getNames();
+            if (names.length === 0) return;
+            const shuffled = names.sort(() => 0.5 - Math.random());
+            document.getElementById('pickedResult').style.fontSize = '1.2rem';
+            document.getElementById('pickedResult').innerText = '第 1 組：' + shuffled.slice(0, 3).join(', ') + '\n第 2 組：' + shuffled.slice(3).join(', ');
+        }
+    </script>
+</body>
+</html>

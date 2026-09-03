@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣薪資/時薪與加班費極速試算機 - 買便當 mybanddown</title>
+
+    <meta name="description" content="專為台灣上班族打造的薪資與加班費計算機。輸入月薪自動換算時薪、勞健保自負額，以及平日/休息日加班費倍率試算。100% 免費本機運行。">
+    <meta name="keywords" content="買便當,薪資計算機,時薪換算,加班費計算,勞健保計算,勞基法加班費">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-506-salary-calc.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .salary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .res-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 台灣薪資/時薪與加班費極速試算機</li>
+            </ol>
+        </nav>
+
+        <div class="salary-card">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">💰 台灣薪資/時薪與加班費極速試算機</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">依據台灣勞基法規範，輸入月薪自動求出平均平日時薪與平日加班費（1.34倍 / 1.67倍）。</p>
+
+            <div style="max-width:400px; margin-bottom:20px;">
+                <label for="monthly-salary" style="font-weight:bold; display:block; margin-bottom:6px;">請輸入約定月薪 (NT$)</label>
+                <input type="number" id="monthly-salary" class="form-control" placeholder="例：36000" oninput="calcSalary()">
+            </div>
+
+            <div style="background:var(--panel-bg); padding:18px; border-radius:8px; border:1px solid var(--border-light);">
+                <div class="res-row"><span>平日每小時工資 (月薪 ÷ 240)：</span><strong id="hourly-res">NT$ 0</strong></div>
+                <div class="res-row"><span>平日加班前 2 小時 (時薪 × 1.34)：</span><strong id="ot1-res" style="color:#3b82f6;">NT$ 0 / 時</strong></div>
+                <div class="res-row"><span>平日加班第 3 小時起 (時薪 × 1.67)：</span><strong id="ot2-res" style="color:#ea580c;">NT$ 0 / 時</strong></div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function calcSalary() {
+            const m = parseFloat(document.getElementById('monthly-salary').value);
+            if (isNaN(m) || m <= 0) {
+                document.getElementById('hourly-res').innerText = 'NT$ 0';
+                document.getElementById('ot1-res').innerText = 'NT$ 0 / 時';
+                document.getElementById('ot2-res').innerText = 'NT$ 0 / 時';
+                return;
+            }
+            const hourly = m / 240;
+            document.getElementById('hourly-res').innerText = 'NT$ ' + hourly.toFixed(1);
+            document.getElementById('ot1-res').innerText = 'NT$ ' + (hourly * 1.34).toFixed(1) + ' / 時';
+            document.getElementById('ot2-res').innerText = 'NT$ ' + (hourly * 1.67).toFixed(1) + ' / 時';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用公文 / Email 罐頭句與請假範本 - 買便當 mybanddown</title>
+
+    <meta name="description" content="職場必備公文與 Email 信件罐頭句產生器。收錄請假事由、催款催進度、婉拒邀約與常用商務英文信件，點擊一鍵複製。">
+    <meta name="keywords" content="買便當,Email範本,請假範本,信件罐頭句,商務英文,催款範本,公文範本">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-211-email-templates.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .tpl-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .tpl-item {
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 常用公文 / Email 罐頭句與請假範本</li>
+            </ol>
+        </nav>
+
+        <div class="tpl-card">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">📝 常用公文 / Email 罐頭句與請假範本</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">選擇常用的職場信件範本，點擊即可秒複製。</p>
+
+            <div class="tpl-item">
+                <div style="font-weight:bold; margin-bottom:6px;">【病假 / 事假申請信件範本】</div>
+                <div id="tpl-1" style="color:var(--desc-text); font-size:0.9rem;">主管您好，因今日身體不適（或家中有緊急事宜需處理），特此向您請假一日，期間緊急事項可隨時電話聯繫，謝謝！</div>
+                <button type="button" class="tag-btn" style="margin-top:8px;" onclick="copyTpl('tpl-1')">📋 複製此範本</button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function copyTpl(id) {
+            const txt = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(txt).then(() => alert('信件範本已成功複製！'));
+        }
+    </script>
+</body>
+</html>

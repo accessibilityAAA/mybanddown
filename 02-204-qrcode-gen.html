@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上 QR Code 條碼產生器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上 QR Code 條碼產生器，支援網址、文字、Wi-Fi 密碼、vCard 名片與 Email。提供 PNG、JPG 高清下載與一鍵複製圖片，純前端即時運算不上傳資料。">
+    <meta name="keywords" content="QR Code 產生器,條碼產生器,QR碼生成,線上QR Code,Wi-Fi條碼,vCard條碼,買便當,mybanddown,線上工具">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-204-qrcode-gen.html">
+
+    <!-- 🌟 深夜模式防閃爍極速預載腳本 -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+
+    <style>
+        .qr-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .type-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: var(--body-text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover, .tab-btn.active {
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #ea580c;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: var(--desc-text);
+            margin-bottom: 6px;
+        }
+
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-input-wrapper input[type="color"] {
+            width: 36px; height: 36px;
+            border: none; border-radius: 6px;
+            cursor: pointer; padding: 0; background: transparent;
+        }
+
+        .preview-box {
+            background: var(--panel-bg);
+            border: 2px dashed var(--border-light);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 320px;
+            position: sticky; top: 80px;
+        }
+
+        #qrcode-canvas {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin-bottom: 15px;
+            display: flex; justify-content: center; align-items: center;
+            max-width: 100%;
+        }
+
+        .download-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .btn-row { display: flex; gap: 8px; }
+        .btn-tool {
+            flex: 1; padding: 10px 14px; border-radius: 6px; border: none;
+            font-size: 0.9rem; font-weight: bold; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-primary { background: #ea580c; color: #ffffff; }
+        .btn-secondary { background: var(--title-blue); color: #ffffff; }
+        .btn-copy { background: #334155; color: #ffffff; }
+
+        .toast-msg {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1c1917; color: #ffffff;
+            padding: 10px 24px; border-radius: 25px;
+            font-size: 0.95rem; font-weight: bold;
+            opacity: 0; transition: all 0.3s ease; z-index: 9999;
+        }
+        .toast-msg.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        @media (max-width: 850px) {
+            .qr-layout { grid-template-columns: 1fr; }
+            .preview-box { position: static; }
+        }
+    </style>
+
+    <script src="js/components.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:10px; margin-bottom: 20px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:4px;">:::</span>
+                    </a>
+                    <a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li> / 線上 QR Code 條碼產生器</li>
+            </ol>
+        </nav>
+
+        <div class="tool-card-box">
+            <h1 style="color:var(--title-blue); font-size:1.4rem; margin-bottom:12px; border-bottom:2px solid var(--border-light); padding-bottom:8px;">
+                📷 線上 QR Code 條碼產生器
+            </h1>
+            <p style="color: var(--desc-text); font-size: 0.9rem;">
+                輸入網址、文字、Wi-Fi 或聯絡人名片，即時自訂顏色與尺寸產出高清 QR Code。<strong>100% 純前端本機處理，資料不會上傳伺服器！</strong>
+            </p>
+
+            <div class="qr-layout">
+                <div class="setting-panel">
+                    <div class="type-tabs">
+                        <button type="button" class="tab-btn active" onclick="switchType('url', this)">🌐 網址</button>
+                        <button type="button" class="tab-btn" onclick="switchType('text', this)">📝 純文字</button>
+                        <button type="button" class="tab-btn" onclick="switchType('wifi', this)">📶 Wi-Fi 密碼</button>
+                        <button type="button" class="tab-btn" onclick="switchType('vcard', this)">🎴 聯絡人名片</button>
+                        <button type="button" class="tab-btn" onclick="switchType('email', this)">✉️ 電子郵件</button>
+                    </div>
+
+                    <div id="panel-url" class="tab-panel">
+                        <div class="form-group">
+                            <label for="input-url">請輸入網站網址 (URL)</label>
+                            <input type="url" class="form-control" id="input-url" placeholder="https://www.example.com" value="https://www.mybanddown.com" oninput="generateQR()">
+                        </div>
+                    </div>
+
+                    <div id="panel-text" class="tab-panel" style="display:none;">
+                        <div class="form-group">
+                            <label for="input-text">請輸入任意文字內容</label>
+                            <textarea class="form-control" id="input-text" placeholder="請在此輸入要轉換成 QR Code 的文字..." oninput="generateQR()">歡迎使用買便當 mybanddown 免費線上工具網！</textarea>
+                        </div>
+                    </div>
+
+                    <div id="panel-wifi" class="tab-panel" style="display:none;">
+                        <div class="form-group">
+                            <label for="wifi-ssid">Wi-Fi 名稱 (SSID)</label>
+                            <input type="text" class="form-control" id="wifi-ssid" placeholder="例如：Home_WiFi" oninput="generateQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="wifi-pass">Wi-Fi 密碼</label>
+                            <input type="text" class="form-control" id="wifi-pass" placeholder="請輸入密碼" oninput="generateQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="wifi-type">加密類型</label>
+                            <select class="form-control" id="wifi-type" onchange="generateQR()">
+                                <option value="WPA" selected>WPA / WPA2 / WPA3</option>
+                                <option value="WEP">WEP</option>
+                                <option value="nopass">無密碼 (公開網路)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="panel-vcard" class="tab-panel" style="display:none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label for="vcard-name">姓名</label>
+                                <input type="text" class="form-control" id="vcard-name" placeholder="王小明" oninput="generateQR()">
+                            </div>
+                            <div class="form-group">
+                                <label for="vcard-phone">電話號碼</label>
+                                <input type="tel" class="form-control" id="vcard-phone" placeholder="0912345678" oninput="generateQR()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="vcard-email">電子郵件</label>
+                            <input type="email" class="form-control" id="vcard-email" placeholder="service@example.com" oninput="generateQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="vcard-org">公司 / 單位</label>
+                            <input type="text" class="form-control" id="vcard-org" placeholder="買便當工作室" oninput="generateQR()">
+                        </div>
+                    </div>
+
+                    <div id="panel-email" class="tab-panel" style="display:none;">
+                        <div class="form-group">
+                            <label for="email-to">收件人 Email</label>
+                            <input type="email" class="form-control" id="email-to" placeholder="target@example.com" oninput="generateQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="email-subject">郵件主旨</label>
+                            <input type="text" class="form-control" id="email-subject" placeholder="詢問買便當工具問題" oninput="generateQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="email-body">郵件內文</label>
+                            <textarea class="form-control" id="email-body" placeholder="請輸入預設郵件內文..." oninput="generateQR()"></textarea>
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 20px 0;">
+
+                    <div class="color-picker-group">
+                        <div class="form-group">
+                            <label>條碼前景色 (Dark Color)</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="qr-color-dark" value="#000000" onchange="generateQR()">
+                                <span id="color-dark-val" style="font-size:0.85rem; color:var(--desc-text);">#000000</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>條碼背景色 (Light Color)</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="qr-color-light" value="#ffffff" onchange="generateQR()">
+                                <span id="color-light-val" style="font-size:0.85rem; color:var(--desc-text);">#ffffff</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label for="qr-size">解析度尺寸 (px)</label>
+                            <select class="form-control" id="qr-size" onchange="generateQR()">
+                                <option value="180">180 x 180 (小)</option>
+                                <option value="260" selected>260 x 260 (標準)</option>
+                                <option value="350">350 x 350 (大)</option>
+                                <option value="500">500 x 500 (超高清印刷)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="qr-correct">容錯級別 (Correction)</label>
+                            <select class="form-control" id="qr-correct" onchange="generateQR()">
+                                <option value="L">L (7% 損壞可修復)</option>
+                                <option value="M" selected>M (15% 損壞可修復)</option>
+                                <option value="Q">Q (25% 損壞可修復)</option>
+                                <option value="H">H (30% 高容錯印刷)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-box">
+                    <div id="qrcode-canvas"></div>
+                    <div style="font-size: 0.85rem; color: var(--desc-text); margin-bottom: 15px;">即時產出預覽</div>
+                    
+                    <div class="download-btns">
+                        <div class="btn-row">
+                            <button type="button" class="btn-tool btn-primary" onclick="downloadQR('png')">下載 PNG</button>
+                            <button type="button" class="btn-tool btn-secondary" onclick="downloadQR('jpg')">下載 JPG</button>
+                        </div>
+                        <button type="button" class="btn-tool btn-copy" onclick="copyImageToClipboard()">📋 一鍵複製 QR Code 圖片</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast-msg" id="toast">已成功複製圖片到剪貼簿！</div>
+    <div id="global-footer"></div>
+
+    <script>
+        let qrInstance = null;
+        let currentType = 'url';
+
+        function switchType(type, btn) {
+            currentType = type;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+            document.getElementById(`panel-${type}`).style.display = 'block';
+
+            generateQR();
+        }
+
+        function getQRTextContent() {
+            if (currentType === 'url') {
+                return document.getElementById("input-url").value.trim() || "https://www.mybanddown.com";
+            } else if (currentType === 'text') {
+                return document.getElementById("input-text").value.trim() || "買便當 mybanddown";
+            } else if (currentType === 'wifi') {
+                const ssid = document.getElementById("wifi-ssid").value.trim();
+                const pass = document.getElementById("wifi-pass").value.trim();
+                const type = document.getElementById("wifi-type").value;
+                return `WIFI:S:${ssid};T:${type};P:${pass};;`;
+            } else if (currentType === 'vcard') {
+                const name = document.getElementById("vcard-name").value.trim();
+                const phone = document.getElementById("vcard-phone").value.trim();
+                const email = document.getElementById("vcard-email").value.trim();
+                const org = document.getElementById("vcard-org").value.trim();
+                return `BEGIN:VCARD\nVERSION:3.0\nN:${name}\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nORG:${org}\nEND:VCARD`;
+            } else if (currentType === 'email') {
+                const to = document.getElementById("email-to").value.trim();
+                const sub = encodeURIComponent(document.getElementById("email-subject").value.trim());
+                const body = encodeURIComponent(document.getElementById("email-body").value.trim());
+                return `mailto:${to}?subject=${sub}&body=${body}`;
+            }
+            return "https://www.mybanddown.com";
+        }
+
+        function generateQR() {
+            const container = document.getElementById("qrcode-canvas");
+            container.innerHTML = "";
+
+            const textContent = getQRTextContent();
+            const size = parseInt(document.getElementById("qr-size").value) || 260;
+            const darkColor = document.getElementById("qr-color-dark").value;
+            const lightColor = document.getElementById("qr-color-light").value;
+            const correctLevelVal = document.getElementById("qr-correct").value;
+
+            document.getElementById('color-dark-val').innerText = darkColor;
+            document.getElementById('color-light-val').innerText = lightColor;
+
+            let level = QRCode.CorrectLevel.M;
+            if (correctLevelVal === 'L') level = QRCode.CorrectLevel.L;
+            if (correctLevelVal === 'Q') level = QRCode.CorrectLevel.Q;
+            if (correctLevelVal === 'H') level = QRCode.CorrectLevel.H;
+
+            qrInstance = new QRCode(container, {
+                text: textContent,
+                width: size,
+                height: size,
+                colorDark: darkColor,
+                colorLight: lightColor,
+                correctLevel: level
+            });
+        }
+
+        function downloadQR(format) {
+            const img = document.querySelector("#qrcode-canvas img");
+            const canvas = document.querySelector("#qrcode-canvas canvas");
+
+            let dataUrl = "";
+            if (canvas) {
+                dataUrl = canvas.toDataURL(`image/${format === 'png' ? 'png' : 'jpeg'}`);
+            } else if (img) {
+                dataUrl = img.src;
+            }
+
+            if (!dataUrl) return;
+
+            const link = document.createElement("a");
+            link.download = `qrcode-${Date.now()}.${format}`;
+            link.href = dataUrl;
+            link.click();
+        }
+
+        function copyImageToClipboard() {
+            const canvas = document.querySelector("#qrcode-canvas canvas");
+            const img = document.querySelector("#qrcode-canvas img");
+
+            if (canvas) {
+                canvas.toBlob((blob) => {
+                    if (!blob) return;
+                    try {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            showToast("✓ QR Code 圖片已成功複製到剪貼簿！");
+                        }).catch(() => { alert("瀏覽器不支援複製圖片，請使用「下載 PNG」按鈕！"); });
+                    } catch (e) { alert("瀏覽器不支援複製圖片，請使用「下載 PNG」按鈕！"); }
+                }, 'image/png');
+            } else if (img) {
+                fetch(img.src)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        return navigator.clipboard.write([item]);
+                    })
+                    .then(() => { showToast("✓ QR Code 圖片已成功複製到剪貼簿！"); })
+                    .catch(() => { alert("瀏覽器不支援複製圖片，請使用「下載 PNG」按鈕！"); });
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(generateQR, 100);
+        });
+    </script>
+</body>
+</html>

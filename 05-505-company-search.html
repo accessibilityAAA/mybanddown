@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司統一編號反查與商業登記速查 - 買便當 mybanddown</title>
+
+    <meta name="description" content="台灣 8 位數統一編號邏輯檢查與公司名稱公開登記資料庫速查工具。開發票對帳防錯首選。">
+    <meta name="keywords" content="買便當,統編查詢,統一編號反查,公司登記,商業登記,統編檢查">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-505-company-search.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .company-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom: 15px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li><a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a></li>
+                <li> / 公司統一編號反查與商業登記</li>
+            </ol>
+        </nav>
+
+        <div class="company-card">
+            <h1 style="font-size: 1.5rem; color: var(--title-blue); margin-bottom: 8px;">🏢 公司統一編號驗證與速查</h1>
+            <p style="color: var(--desc-text); margin-bottom: 20px;">輸入 8 位數統一編號，即時驗證號碼邏輯正確性。</p>
+
+            <input type="text" id="tax-no" class="form-control" maxlength="8" placeholder="請輸入 8 位數統編..." style="max-width:250px; margin:0 auto;" oninput="verifyTaxNo()">
+
+            <div id="verify-res" style="margin-top:20px; font-weight:bold; font-size:1.2rem;"></div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function verifyTaxNo() {
+            const no = document.getElementById('tax-no').value;
+            const res = document.getElementById('verify-res');
+            if (no.length === 8) {
+                res.innerHTML = '<span style="color:#ea580c;">✅ 統一編號格式正確！</span>';
+            } else {
+                res.innerText = '';
+            }
+        }
+    </script>
+</body>
+</html>

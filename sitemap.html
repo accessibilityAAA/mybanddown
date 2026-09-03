@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網站導覽 (Sitemap) - 買便當 mybanddown</title>
+    
+    <!-- SEO 最佳化設定 -->
+    <meta name="description" content="買便當 mybanddown 線上服務網之全站網站導覽 (HTML Sitemap)，完整收錄產生器、符號、隨機抽籤、PDF工具、圖片處理、計時器與計算機總覽。">
+    <meta name="keywords" content="網站導覽,Sitemap,工具網地圖,線上工具總覽,買便當,mybanddown,工具邦">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/sitemap.html">
+
+    <!-- 🌟 深夜模式防閃爍極速預載腳本 -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+
+    <style>
+        .sitemap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        .sitemap-cat-box {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 18px;
+        }
+        .sitemap-cat-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--title-blue);
+            border-bottom: 2px solid #ea580c;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sitemap-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sitemap-list li {
+            margin-bottom: 8px;
+            font-size: 0.92rem;
+        }
+        .sitemap-list a {
+            color: var(--desc-text);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: inline-block;
+        }
+        .sitemap-list a:hover {
+            color: #ea580c;
+            text-decoration: underline;
+        }
+        .badge-dev {
+            font-size: 0.75rem;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        .badge-ok {
+            font-size: 0.75rem;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+    </style>
+
+    <script src="js/components.js" defer></script>
+</head>
+<body>
+
+    <!-- 無障礙跳頁連結 (WCAG AAA) -->
+    <a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+
+    <!-- 1. 自動刷出獨立頂部選單 (Header) -->
+    <div id="global-header"></div>
+
+    <!-- 2. 主要內容區 -->
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:10px; margin-bottom: 20px;">
+            <ol style="list-style:none; padding:0; display:flex; gap:6px; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:4px;">:::</span>
+                    </a>
+                    <a href="index.html" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li> / 網站導覽 (Sitemap)</li>
+            </ol>
+        </nav>
+
+        <div class="sitemap-card">
+            <h1 style="color:var(--title-blue); font-size:1.5rem; margin-bottom:12px; border-bottom:2px solid var(--border-light); padding-bottom:8px;">
+                🗺️ 全站工具網站導覽 (Sitemap)
+            </h1>
+            <p style="color: var(--desc-text); font-size: 0.9rem;">
+                這裡完整分類列出了買便當 mybanddown 目前與規劃中的所有線上工具，點擊即可直接進入使用。
+            </p>
+
+            <div class="sitemap-grid">
+
+                <!-- 00. 系統與公共頁面 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">⚙️ 系統與條款</div>
+                    <ul class="sitemap-list">
+                        <li><a href="index.html">🏠 首頁 (工具大廳) <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="about_us.html">🏢 關於我們 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="report.html">🚨 問題回報與許願池 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="sitemap.html">🗺️ 網站導覽 (Sitemap) <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="privacy.html">🔒 隱私權及安全政策 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="terms.html">📄 服務條款 <span class="badge-ok">已上線</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 01. 隨機與決定類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">🎲 隨機、決定與遊戲</div>
+                    <ul class="sitemap-list">
+                        <li><a href="01-101-wheel.html">🎡 幸運轉盤抽籤工具 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="01-102-random-picker.html">🎴 隨機抽籤與紙牌選人 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-103-random-group.html">👥 隨機團隊分組工具 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-104-random-sort.html">🔀 隨機排序產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-105-coin-dice.html">🪙 3D 線上拋硬幣/擲骰子/擲筊 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-106-number-gen.html">🔢 隨機亂數號碼產生器 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 02. 文字、符號與產生器類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">📝 文字、符號與產生器</div>
+                    <ul class="sitemap-list">
+                        <li><a href="02-201-char-count.html">📊 線上字數統計與文字分析器 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="02-202-symbols.html">♟️ 特殊符號與顏文字一鍵複製 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="02-204-qrcode-gen.html">📷 線上 QR Code 條碼產生器 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="02-203-fancy-text.html">🔤 酷文字與 IG 字體產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-205-barcode-gen.html">║▌ 線上條碼 (Barcode) 產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-206-full-half-width.html">🔀 全半形與繁簡體文字轉換 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-207-text-cleaner.html">✂️ 社群零寬度空白與換行轉換 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-208-strikethrough-gen.html">̶A̶ 文字刪除線/底線產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-209-zalgo-ant-text.html">🐜 Zalgo 混亂文與螞蟻文產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-210-lorem-ipsum.html">📑 假字 / 假文 (Lorem) 產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-211-text-to-speech.html">🗣️ 線上文字轉語音 (TTS) <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="02-212-emoji-picker.html">😀 Emoji 表情符號大全 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 03. PDF 與文件處理類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">📄 PDF 與文件處理</div>
+                    <ul class="sitemap-list">
+                        <li><a href="03-301-pdf-print-layout.html">🖨️ PDF 列印 (併頁/證件影本) <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="03-302-pdf-merge-split.html">📕 線上 PDF 合併與分割 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="03-303-pdf-compress.html">🗜️ 線上 PDF 極速壓縮器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="03-304-pdf-converter.html">🖼️ PDF 與 JPG 雙向轉檔 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="03-305-pdf-organizer.html">📑 PDF 旋轉/整理/加頁碼 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 04. 圖片與多媒體類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">🖼️ 圖片與多媒體</div>
+                    <ul class="sitemap-list">
+                        <li><a href="04-405-heic-webp-convert.html">🔄 HEIC & WebP 轉 JPG/PNG <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="04-401-img-privacy.html">👤 圖片隱私遮蔽 (馬賽克/EXIF) <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-402-img-editor.html">✂️ 線上圖片萬用工具箱 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-403-id-photo.html">📸 證件照製作與一鍵換底色 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-404-photo-collage.html">🖼️ 照片網格拼貼製作工具 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-406-video-tools.html">🎬 影片剪輯/分割/轉 GIF <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-407-media-recorder.html">🎙️ 線上錄音/螢幕錄影/鏡頭 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="04-408-audio-tools.html">🎵 線上音訊剪輯/轉檔/合併 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 05. 實用計算與商業轉換類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">🧮 實用計算與商業</div>
+                    <ul class="sitemap-list">
+                        <li><a href="05-501-tax-invoice.html">🧾 手寫發票與營業稅計算機 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="05-502-percentage-calc.html">🔢 百分比與折扣趴數計算器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="05-503-unit-converter.html">📐 萬用單位換算與螢幕尺 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="05-504-hash-generator.html">🔒 線上雜湊工具 (MD5/SHA) <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="05-505-company-search.html">🏢 台灣公司登記與統編查詢 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 06. 時間與生活安全類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">⏰ 時間與生活安全</div>
+                    <ul class="sitemap-list">
+                        <li><a href="06-601-password-gen.html">🔑 高強度安全隨機密碼產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-602-pomodoro.html">🍅 線上番茄鐘專注計時器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-603-digital-clock.html">🕒 全螢幕數位/指針時鐘 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-604-timer-alarm.html">⏱️ 倒數計時器、碼表與鬧鐘 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-605-date-countdown.html">⏳ 指定日期倒數計時器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-606-world-clock-timezone.html">🌐 世界時間與跨時區轉換器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-607-lunar-calendar.html">📅 今日農民曆與國農曆對照 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-608-scoreboard.html">🏀 運動計分板與點擊計數器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-609-net-speed-test.html">🚀 純網頁網路速度測試 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-610-screen-tools.html">🖥️ 螢幕工具 (全黑/全白/鏡子) <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-611-ruler-online.html">📏 線上螢幕實物尺寸量尺 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="06-612-hiragana-cards.html">🇯🇵 日語五十音練習閃卡 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- 07. 交通路線與靜態參考類 -->
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">🚇 交通路線與參考</div>
+                    <ul class="sitemap-list">
+                        <li><a href="07-701-mrt-taipei.html">🚇 台北捷運路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-702-mrt-taichung.html">🚆 台中捷運路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-703-mrt-kaohsiung.html">🚊 高雄捷運與輕軌路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-704-mrt-sanying.html">🚝 三鶯線捷運路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-705-mrt-danhai.html">🚃 淡海輕軌路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-706-mrt-taoyuan-airport.html">✈️ 桃園機場捷運路線圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-707-highway-toll.html">🛣️ 國道計程收費與交流道地圖 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="07-708-taiwan-aqi.html">🍃 台灣空氣品質指數 (AQI) <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 3. 自動刷出獨立頁尾選單 (Footer) -->
+    <div id="global-footer"></div>
+
+</body>
+</html>
