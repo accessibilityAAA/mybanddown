@@ -3,34 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全站網站導覽 (Sitemap) - 買便當 mybanddown</title>
-    <meta name="description" content="免費線上【全站網站導覽 (Sitemap)】工具，純前端本機運算不上傳，專為上班族與師生打造。">
+    <title>網站導覽 (Sitemap) - 買便當 mybanddown</title>
+    
+    <meta name="description" content="買便當 mybanddown 線上服務網之全站網站導覽 (HTML Sitemap)，完整收錄產生器、符號、隨機抽籤、PDF工具、圖片處理、計時器與計算機總覽。">
+    <meta name="keywords" content="網站導覽,Sitemap,工具網地圖,線上工具總覽,買便當,mybanddown,工具邦">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/sitemap.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
     <link rel="stylesheet" href="css/main.css">
-    <script src="js/components.js" defer></script>
+
     <style>
-        .wcag3-container { max-width: 40ch; margin: 0 auto 24px auto; text-align: center; }
-        @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; animation: none !important; }
+        .sitemap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
+            gap: 1.5625rem;
+            margin-top: 1.5625rem;
+        }
+        .sitemap-cat-box {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            border-radius: 0.5rem;
+            padding: 1.125rem;
+        }
+        .sitemap-cat-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--title-blue);
+            border-bottom: 0.125rem solid #ea580c;
+            padding-bottom: 0.375rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sitemap-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sitemap-list li {
+            margin-bottom: 0.5rem;
+            font-size: 0.92rem;
+        }
+        .sitemap-list a {
+            color: var(--desc-text);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: inline-block;
+        }
+        .sitemap-list a:hover {
+            color: #ea580c;
+            text-decoration: underline;
+        }
+        .badge-dev {
+            font-size: 0.75rem;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            margin-left: 0.3125rem;
+        }
+        .badge-ok {
+            font-size: 0.75rem;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            margin-left: 0.3125rem;
         }
     </style>
+
+    <script src="js/components.js" defer></script>
 </head>
 <body>
-    <a href="#main-content" class="skip-link" title="跳過導覽選單，直接進入主要內容區">跳過導覽選單，直接進入主要內容區</a>
+
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+
     <div id="global-header"></div>
-    <main class="main-container" id="main-content" role="main" tabindex="-1" style="padding:24px 16px; max-width:800px; margin:0 auto;">
-        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-bottom:16px;">
-            <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區 [Alt+C]" style="text-decoration:none; color:inherit;">
-                <span style="color:#ea580c; font-weight:bold; margin-right:6px;">:::主要內容區定位點</span>
-            </a>
-            <a href="index.html" title="回到買便當首頁" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a> / 全站網站導覽 (Sitemap)
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li> / 網站導覽 (Sitemap)</li>
+            </ol>
         </nav>
-        <div style="background:var(--panel-bg, #f8fafc); border:2px dashed var(--border-light, #cbd5e1); border-radius:12px; padding:40px 20px; text-align:center; margin-top:20px;">
-            <div style="font-size:3rem; margin-bottom:12px;" aria-hidden="true">🍱</div>
-            <h1 style="font-size:1.35rem; color:var(--title-blue, #0f172a); margin-bottom:12px; line-height:1.4;">【買便當】工程師正在為您精心烹調 全站網站導覽 (Sitemap) ...</h1>
-            <p class="wcag3-container" style="color:var(--desc-text, #334155); font-size:1rem; line-height:1.65;">此工具已納入開發時程，即將上線！100% 免費、純前端極速運算，敬請期待。</p>
-            <a href="index.html" title="回到首頁瀏覽其他 S 級熱門工具" style="background:#ea580c; color:#ffffff; padding:10px 20px; border-radius:9999px; font-weight:bold; text-decoration:none; display:inline-block; border:2px solid transparent;">👉 先去逛逛其他已上線的 S 級熱門工具</a>
+
+        <div class="sitemap-card">
+            <h1 style="color:var(--title-blue); font-size:1.5rem; margin-bottom:0.75rem; border-bottom:0.125rem solid var(--border-light); padding-bottom:0.5rem;">
+                🗺️ 全站工具網站導覽 (Sitemap)
+            </h1>
+            <p style="color: var(--desc-text); font-size: 0.9rem; max-width: 40ch;">
+                這裡完整分類列出了買便當 mybanddown 目前與規劃中的所有線上工具，點擊即可直接進入使用。
+            </p>
+
+            <div class="sitemap-grid">
+
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">⚙️ 系統與條款</div>
+                    <ul class="sitemap-list">
+                        <li><a href="index.html" title="前往買便當網站首頁工具大廳">🏠 首頁 (工具大廳) <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="about_us.html" title="瞭解買便當品牌理念與團隊介紹">🏢 關於我們 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="report.html" title="前往意見反饋表單進行問題回報">🚨 問題回報與許願池 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="sitemap.html" title="查看全站 HTML 網站地圖與工具清單">🗺️ 網站導覽 (Sitemap) <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="privacy.html" title="閱讀買便當隱私權與資訊安全政策">🔒 隱私權及安全政策 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="terms.html" title="閱讀買便當服務條款與免責宣告">📄 服務條款 <span class="badge-ok">已上線</span></a></li>
+                    </ul>
+                </div>
+
+                <div class="sitemap-cat-box">
+                    <div class="sitemap-cat-title">🎲 隨機、決定與遊戲</div>
+                    <ul class="sitemap-list">
+                        <li><a href="01-101-wheel.html" title="開啟午餐決策幸運轉盤抽籤工具">🎡 幸運轉盤抽籤工具 <span class="badge-ok">已上線</span></a></li>
+                        <li><a href="01-102-random-picker.html" title="開啟課堂隨機點名與抽卡片工具">🎴 隨機抽籤與紙牌選人 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-103-random-group.html" title="開啟團隊公平隨機分組工具">👥 隨機團隊分組工具 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-104-random-sort.html" title="開啟名單與題目隨機洗牌產生器">🔀 隨機排序產生器 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-105-coin-dice.html" title="開啟 3D 擬真拋硬幣與線上擲筊工具">🪙 3D 線上拋硬幣/擲骰子/擲筊 <span class="badge-dev">開發中</span></a></li>
+                        <li><a href="01-106-number-gen.html" title="開啟隨機亂數號碼產生器">🔢 隨機亂數號碼產生器 <span class="badge-dev">開發中</span></a></li>
+                    </ul>
+                </div>
+
+            </div>
         </div>
+
     </main>
+
     <div id="global-footer"></div>
+
 </body>
 </html>
