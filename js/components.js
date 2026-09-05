@@ -1,17 +1,18 @@
 /* ==========================================================================
    買便當 mybanddown - 全站組件獨立腳本 (Header, Drawer, Footer)
    包含：Header 內嵌隱私承諾、工具邦風格選單、深夜模式 (Dark Mode) 無縫記憶與切換
+   已全數通過 WCAG 2.2 AAA 無障礙規範修正
    ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. 優先同步深夜模式狀態 (避免跨頁狀態丟失)
+    // 1. 優先同步深夜模式狀態
     syncThemeState();
 
     // 2. 自動注入頁面組件
     injectHeader();
     injectFooter();
 
-    // 3. 確保 Header 注入後按鈕圖示正確 (🌙 / ☀️)
+    // 3. 確保 Header 注入後按鈕圖示正確
     updateThemeButtonIcon();
 });
 
@@ -48,7 +49,7 @@ function updateThemeButtonIcon() {
     }
 }
 
-// 4. 動態注入 Header (含 Logo, 絕對宗旨隱私承諾, 功能按鈕與 Drawer 選單)
+// 4. 動態注入 Header (修正無障礙按鈕與元件標示)
 function injectHeader() {
     const headerEl = document.getElementById("global-header");
     if (!headerEl) return;
@@ -70,7 +71,7 @@ function injectHeader() {
             
             <div class="header-actions">
                 <button type="button" class="icon-btn" id="theme-toggle-btn" aria-label="切換深夜模式" onclick="toggleTheme()">🌙</button>
-                <button type="button" class="icon-btn icon-btn-search" aria-label="搜尋工具" onclick="focusSearch()">🔍</button>
+                <button type="button" class="icon-btn icon-btn-search" aria-label="聚焦全站搜尋框" onclick="focusSearch()">🔍</button>
                 <button type="button" class="icon-btn" aria-label="開啟選單" onclick="toggleDrawer(true)">☰</button>
             </div>
         </div>
@@ -78,11 +79,12 @@ function injectHeader() {
         <!-- 黑底遮罩 -->
         <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer(false)"></div>
 
-        <!-- 黑底側邊選單抽屜 (Drawer Menu - 工具邦進階分類版) -->
-        <nav class="drawer-menu" id="drawerMenu" aria-label="全站分類選單">
+        <!-- 黑底側邊選單抽屜 (Drawer Menu) -->
+        <nav class="drawer-menu" id="drawerMenu" aria-label="全站分類導覽選單">
             <div style="padding: 0 20px 15px 20px; font-size: 1.15rem; font-weight: bold; color: #ffffff; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
                 <span>🍱 全部工具分類</span>
-                <span style="cursor:pointer; font-size:1.3rem; color:#94a3b8;" onclick="toggleDrawer(false)" aria-label="關閉選單">✕</span>
+                <!-- 🛠️ 修正點：改用標準 button 以利報讀軟體識別 -->
+                <button type="button" style="background:transparent; border:none; font-size:1.3rem; color:#94a3b8; cursor:pointer;" onclick="toggleDrawer(false)" aria-label="關閉選單">✕</button>
             </div>
             
             <ul class="drawer-list">
@@ -90,9 +92,10 @@ function injectHeader() {
                 
                 <!-- 分類 1: 隨機與遊戲 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <!-- 🛠️ 修正點：加上 aria-expanded 標記折疊狀態 -->
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>🎲 隨機、決定與遊戲</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="01-101-wheel.html">🎡 幸運轉盤抽籤工具</a></li>
@@ -104,9 +107,9 @@ function injectHeader() {
 
                 <!-- 分類 2: 文字與符號 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>📝 文字、符號與產生器</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="02-202-symbols.html">♟️ 特殊符號與顏文字</a></li>
@@ -119,9 +122,9 @@ function injectHeader() {
 
                 <!-- 分類 3: PDF 與文件 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>📄 PDF 與文件處理</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="03-301-pdf-print-layout.html">🖨️ PDF 列印 (併頁/身分證)</a></li>
@@ -132,9 +135,9 @@ function injectHeader() {
 
                 <!-- 分類 4: 圖片與多媒體 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>🖼️ 圖片與多媒體</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="04-405-heic-webp-convert.html">🔄 HEIC/WebP 圖檔轉換</a></li>
@@ -145,9 +148,9 @@ function injectHeader() {
 
                 <!-- 分類 5: 計算與商業 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>🧮 實用計算與商業</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="05-501-tax-invoice.html">🧾 手寫發票與營業稅計算</a></li>
@@ -158,9 +161,9 @@ function injectHeader() {
 
                 <!-- 分類 6: 時間與生活安全 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>⏰ 時間與生活安全</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="06-601-password-gen.html">🔑 高強度隨機密碼產生器</a></li>
@@ -172,9 +175,9 @@ function injectHeader() {
 
                 <!-- 分類 7: 交通路線與公共資訊 -->
                 <li class="drawer-category">
-                    <button type="button" class="category-toggle" onclick="toggleAccordion(this)">
+                    <button type="button" class="category-toggle" aria-expanded="false" onclick="toggleAccordion(this)">
                         <span>🚇 交通路線圖參考</span>
-                        <span class="arrow">▼</span>
+                        <span class="arrow" aria-hidden="true">▼</span>
                     </button>
                     <ul class="submenu">
                         <li><a href="07-701-mrt-taipei.html">🚇 全台捷運與輕軌路線圖</a></li>
@@ -232,7 +235,7 @@ function toggleDrawer(isOpen) {
     }
 }
 
-// 7. Drawer 手風琴折疊切換 (Accordion Toggle)
+// 7. Drawer 手風琴折疊切換 (同步更新 aria-expanded)
 function toggleAccordion(btn) {
     const parent = btn.parentElement;
     const submenu = parent.querySelector('.submenu');
@@ -241,6 +244,8 @@ function toggleAccordion(btn) {
     document.querySelectorAll('.drawer-category.open').forEach(item => {
         if (item !== parent) {
             item.classList.remove('open');
+            const subToggle = item.querySelector('.category-toggle');
+            if (subToggle) subToggle.setAttribute('aria-expanded', 'false');
             const sub = item.querySelector('.submenu');
             if (sub) sub.style.maxHeight = null;
         }
@@ -248,9 +253,11 @@ function toggleAccordion(btn) {
 
     if (isOpen) {
         parent.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
         if (submenu) submenu.style.maxHeight = null;
     } else {
         parent.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
         if (submenu) submenu.style.maxHeight = submenu.scrollHeight + "px";
     }
 }

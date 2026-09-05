@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[cite: 1]<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -114,7 +114,8 @@
                 </ol>
             </nav>
 
-            <input type="search" id="site-search" placeholder="全站 0 毫秒即時搜尋..." oninput="filterTools(this.value)" class="form-control" style="width: 250px;">
+            <!-- 🛠️ 修正 1：加上 aria-label 與 title -->
+            <input type="search" id="site-search" placeholder="全站 0 毫秒即時搜尋..." aria-label="全站工具即時搜尋" title="全站工具即時搜尋" oninput="filterTools(this.value)" class="form-control" style="width: 250px;">
         </div>
 
         <!-- 🌟 6 大情境頁籤 (Tab Bar) -->
