@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課堂隨機點名與紙牌選人 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【課堂隨機點名與紙牌選人】工具，支援學生名單匯入、不重複抽籤、擬真翻牌音效與自動語音唱名。100% 免費本機運算不上傳。">
+    <meta name="keywords" content="隨機點名,點名抽籤,課堂抽籤,紙牌選人,老師工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-102-random-picker.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，解決本機 file:// 開啟時 CSS 消失的問題 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .picker-container {
+            display: flex; flex-wrap: wrap; gap: 1.875rem; justify-content: center; align-items: flex-start; margin-top: 1.25rem;
+        }
+        .stage-card {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.875rem; text-align: center; flex: 1; min-width: 18.75rem; max-width: 32.5rem;
+        }
+        .card-display {
+            width: 100%; height: 13.75rem; background: var(--panel-bg, #f8fafc); border: 0.125rem solid var(--border-light, #cbd5e1); border-radius: 0.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 1.25rem 0; position: relative; overflow: hidden; box-shadow: inset 0 0.125rem 0.5rem rgba(0,0,0,0.03);
+        }
+        .card-name {
+            font-size: 3rem; font-weight: 900; color: #ea580c; transition: transform 0.15s ease;
+        }
+        .card-name.animating {
+            transform: scale(1.15); color: #3b82f6;
+        }
+        .control-box {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.5625rem; width: 100%; max-width: 22.5rem;
+        }
+        textarea {
+            width: 100%; height: 10rem; background: var(--input-bg, #f8fafc); color: var(--body-text, #1e293b); border: 0.0625rem solid var(--border-light, #cbd5e1); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.95rem; outline: none; margin-bottom: 0.9375rem;
+        }
+        .btn-draw {
+            width: 100%; padding: 0.875rem; font-size: 1.25rem; font-weight: bold; color: #ffffff; background: #ea580c; border: none; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-draw:hover { background: #c2410c; }
+        .btn-draw:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .history-list {
+            margin-top: 1rem; max-height: 7.5rem; overflow-y: auto; text-align: left; font-size: 0.875rem; color: var(--desc-text); background: var(--panel-bg); padding: 0.625rem; border-radius: 0.375rem; border: 0.0625rem solid var(--border-light);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 課堂隨機點名與紙牌選人</li>
+            </ol>
+        </nav>
+
+        <div class="picker-container">
+            <!-- 抽卡展示台 -->
+            <div class="stage-card">
+                <h1 style="font-size:1.35rem; color:var(--title-blue); margin:0;">🎴 隨機點名抽籤舞台</h1>
+                <p style="font-size:0.875rem; color:var(--desc-text); margin-top:0.25rem;">剩餘可抽人數：<strong id="remainingCount">0</strong> 人</p>
+
+                <div class="card-display">
+                    <div id="resultName" class="card-name" role="status" aria-live="polite">準備抽籤</div>
+                </div>
+
+                <button type="button" class="btn-draw" id="drawBtn" title="點擊開始進行隨機抽籤點名" onclick="startDraw()">🎲 開始隨機抽籤</button>
+            </div>
+
+            <!-- 控制面板與名單區 -->
+            <div class="control-box">
+                <label for="nameListInput" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.5rem; display:block;">抽籤名單 (每行一個人名/座號)：</label>
+                <textarea id="nameListInput" name="nameListInput" title="請輸入要進行點名抽籤的名單，每行一個項目" oninput="initCandidates()">1號 張小明
+2號 林小華
+3號 陳大同
+4號 黃阿花
+5號 郭小美
+6號 蔡阿嘎</textarea>
+
+                <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="removeOnDraw" title="勾選後抽中的項目會自動從列表中移除" checked> 🚫 抽中後暫時移除 (避免重複點名)
+                    </label>
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="speakToggle" title="勾選後系統會自動朗讀抽中的名字" checked> 🗣️ 啟用中文語音唱名
+                    </label>
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="soundToggle" title="勾選以啟用洗牌與中獎音效" checked> 🔊 啟用翻牌音效
+                    </label>
+                </div>
+
+                <button type="button" title="重置並重新載入原始抽籤名單" onclick="resetCandidates()" style="width:100%; padding:0.5rem; background:var(--panel-bg); color:var(--body-text); border:0.0625rem solid var(--border-light); border-radius:0.375rem; font-weight:bold; cursor:pointer;">🔄 重置名單清單</button>
+
+                <div style="margin-top:1rem;">
+                    <span style="font-size:0.85rem; font-weight:bold; color:var(--desc-text);">最近抽中紀錄：</span>
+                    <div class="history-list" id="historyBox">尚無紀錄</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let candidates = [];
+        let history = [];
+        let isDrawing = false;
+
+        let soundCtx = null;
+        function getSoundContext() {
+            if (!soundCtx) {
+                soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (soundCtx.state === 'suspended') {
+                soundCtx.resume();
+            }
+            return soundCtx;
+        }
+
+        function playShuffleSound() {
+            if (!document.getElementById('soundToggle').checked) return;
+            const ctxAudio = getSoundContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400 + Math.random() * 200, ctxAudio.currentTime);
+            gain.gain.setValueAtTime(0.1, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.05);
+            osc.connect(gain); gain.connect(ctxAudio.destination);
+            osc.start(); osc.stop(ctxAudio.currentTime + 0.05);
+        }
+
+        function playWinSound() {
+            if (!document.getElementById('soundToggle').checked) return;
+            const ctxAudio = getSoundContext();
+            const notes = [440, 554.37, 659.25, 880];
+            notes.forEach((freq, idx) => {
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                const startTime = ctxAudio.currentTime + idx * 0.06;
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(startTime); osc.stop(startTime + 0.25);
+            });
+        }
+
+        function speakName(text) {
+            if (!document.getElementById('speakToggle').checked) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/^[0-9]+號\s*/, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function initCandidates() {
+            const raw = document.getElementById('nameListInput').value;
+            candidates = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            document.getElementById('remainingCount').innerText = candidates.length;
+        }
+
+        function resetCandidates() {
+            initCandidates();
+            history = [];
+            document.getElementById('historyBox').innerText = '尚無紀錄';
+            document.getElementById('resultName').innerText = '準備抽籤';
+        }
+
+        function startDraw() {
+            if (isDrawing) return;
+            if (candidates.length === 0) {
+                alert('抽籤名單已空！請重新輸入或點擊重置名單。');
+                return;
+            }
+
+            isDrawing = true;
+            document.getElementById('drawBtn').disabled = true;
+            const display = document.getElementById('resultName');
+            const removeOnDraw = document.getElementById('removeOnDraw').checked;
+
+            let counter = 0;
+            const totalSteps = 20;
+            const interval = setInterval(() => {
+                const randomTemp = candidates[Math.floor(Math.random() * candidates.length)];
+                display.innerText = randomTemp;
+                display.classList.add('animating');
+                playShuffleSound();
+                counter++;
+
+                if (counter >= totalSteps) {
+                    clearInterval(interval);
+                    display.classList.remove('animating');
+                    
+                    const selectedIndex = Math.floor(Math.random() * candidates.length);
+                    const winner = candidates[selectedIndex];
+                    display.innerText = winner;
+
+                    if (removeOnDraw) {
+                        candidates.splice(selectedIndex, 1);
+                    }
+
+                    document.getElementById('remainingCount').innerText = candidates.length;
+                    history.unshift(winner);
+                    updateHistory();
+
+                    playWinSound();
+                    speakName(winner);
+
+                    isDrawing = false;
+                    document.getElementById('drawBtn').disabled = false;
+                }
+            }, 80);
+        }
+
+        function updateHistory() {
+            const box = document.getElementById('historyBox');
+            box.innerHTML = history.map((item, idx) => `<div>${idx + 1}. ${item}</div>`).join('');
+        }
+
+        document.addEventListener("DOMContentLoaded", initCandidates);
+    </script>
+</body>
+</html>

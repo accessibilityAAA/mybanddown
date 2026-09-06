@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 多頁併頁列印與拼版佈局工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【PDF 多頁併頁列印與拼版佈局】工具，支援 2in1、4in1 講義省紙拼版與身分證影本併頁，本機純前端處理不上傳。">
+    <meta name="keywords" content="PDF併頁,PDF拼版,PDF列印省紙,2in1,4in1,身分證併頁,PDF工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/03-301-pdf-print-layout.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 輕量獨立 PDF 處理庫 pdf-lib -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .pdf-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .pdf-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .pdf-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .pdf-preview-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+        }
+
+        /* 🌟 無障礙聚焦與拖曳高亮樣式 */
+        .drop-zone {
+            border: 0.125rem dashed #ea580c;
+            border-radius: 0.5rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            background: var(--panel-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover { 
+            background: #fff7ed; 
+            border-color: #c2410c;
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .btn-process {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-process:hover, .btn-process:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+        .btn-process:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        /* 複製成功與狀態 Toast */
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .pdf-preview-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / PDF 多頁併頁列印與拼版佈局工具</li>
+            </ol>
+        </nav>
+
+        <div class="pdf-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                📄 PDF 多頁併頁列印與拼版佈局工具
+            </h1>
+
+            <div class="pdf-layout">
+                <!-- 左側：設定控制台 -->
+                <div class="pdf-panel">
+                    <!-- 🌟 補強：無障礙鍵盤聚焦觸發與拖曳區 -->
+                    <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="點擊或拖曳 PDF 檔案至此處選擇檔案" title="點擊或將 PDF 檔案拖曳至此處" onclick="document.getElementById('fileInput').click()" onkeydown="handleDropKeydown(event)">
+                        <span style="font-size:2.5rem; display:block; margin-bottom:0.5rem;" aria-hidden="true">📂</span>
+                        <span style="font-weight:bold; color:var(--body-text);">點擊選擇或拖曳 PDF 檔案至此</span>
+                        <span style="font-size:0.8rem; color:var(--desc-text); display:block; margin-top:0.25rem;">(檔案僅在您的瀏覽器本機處理，安全不上傳)</span>
+                        <input type="file" id="fileInput" accept="application/pdf" style="display:none;" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="layoutMode" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">拼版併頁模式：</label>
+                        <select id="layoutMode" class="form-control" title="請選擇併頁數量模式">
+                            <option value="2in1" selected>2 in 1 (每頁印 2 頁，講義推薦)</option>
+                            <option value="4in1">4 in 1 (每頁印 4 頁，極速省紙)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pageSize" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">目標紙張尺寸：</label>
+                        <select id="pageSize" class="form-control" title="請選擇輸出紙張尺寸">
+                            <option value="a4" selected>A4 (210 x 297 mm)</option>
+                            <option value="a3">A3 (297 x 420 mm)</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-process" id="processBtn" disabled title="請先上傳 PDF 檔案" onclick="processPDF()">
+                        ⚙️ 開始併頁轉換並下載
+                    </button>
+                </div>
+
+                <!-- 右側：狀態展示台 -->
+                <div class="pdf-preview-box">
+                    <div id="statusBox" role="status" aria-live="polite" style="color:var(--desc-text); font-weight:bold;">
+                        請在左側上傳 PDF 檔案以開始拼版作業！
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與隱私承諾
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具可將多頁 PDF 文檔重新拼版併頁（如 2in1、4in1），大幅節省列印紙張與費用。所有 PDF 解析與重新拼版均在您的瀏覽器內部通過 HTML5 API 完成，100% 不會上傳至任何雲端伺服器，完全保障敏感文件安全。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast (具備無障礙宣言) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功生成併頁 PDF！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let currentPdfBytes = null;
+        let currentFileName = "document.pdf";
+
+        // 初始化拖曳上傳監聽
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('dropZone');
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    loadPdfFile(file);
+                }
+            });
+        });
+
+        function handleDropKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            loadPdfFile(file);
+        }
+
+        function loadPdfFile(file) {
+            if (!file || file.type !== 'application/pdf') {
+                alert('請選擇有效的 PDF 檔案！');
+                return;
+            }
+
+            currentFileName = file.name;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                currentPdfBytes = evt.target.result;
+                document.getElementById('statusBox').innerHTML = `
+                    <span style="color:#22c55e; font-size:1.1rem; display:block; margin-bottom:0.5rem;">✅ 已成功載入 PDF！</span>
+                    <span style="font-size:0.9rem; color:var(--body-text); word-break:break-all;">${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                `;
+                document.getElementById('processBtn').disabled = false;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function processPDF() {
+            if (!currentPdfBytes) return;
+
+            const btn = document.getElementById('processBtn');
+            const statusBox = document.getElementById('statusBox');
+            btn.disabled = true;
+            statusBox.innerText = '⏳ 正在本地處理拼版中，請稍候...';
+
+            try {
+                const { PDFDocument, PageSizes } = PDFLib;
+                const srcDoc = await PDFDocument.load(currentPdfBytes);
+                const outDoc = await PDFDocument.create();
+
+                const mode = document.getElementById('layoutMode').value;
+                const sizeType = document.getElementById('pageSize').value;
+                const targetPageSize = sizeType === 'a3' ? PageSizes.A3 : PageSizes.A4;
+
+                const pageCount = srcDoc.getPageCount();
+
+                if (mode === '2in1') {
+                    // 2 in 1：橫向紙張，左一右一
+                    for (let i = 0; i < pageCount; i += 2) {
+                        const newPage = outDoc.addPage([targetPageSize[1], targetPageSize[0]]); // 橫向 [寬, 高]
+                        const halfW = newPage.getWidth() / 2;
+                        const pageH = newPage.getHeight();
+
+                        // 繪製左頁 (Aspect Fit 居中)
+                        await drawEmbeddedFit(outDoc, newPage, srcDoc, i, 10, 10, halfW - 20, pageH - 20);
+
+                        // 繪製右頁
+                        if (i + 1 < pageCount) {
+                            await drawEmbeddedFit(outDoc, newPage, srcDoc, i + 1, halfW + 10, 10, halfW - 20, pageH - 20);
+                        }
+                    }
+                } else if (mode === '4in1') {
+                    // 4 in 1：直向紙張，田字格 (左上、右上、左下、右下)
+                    for (let i = 0; i < pageCount; i += 4) {
+                        const newPage = outDoc.addPage(targetPageSize); // 直向
+                        const halfW = newPage.getWidth() / 2;
+                        const halfH = newPage.getHeight() / 2;
+
+                        const positions = [
+                            { x: 10, y: halfH + 10 },        // 左上
+                            { x: halfW + 10, y: halfH + 10 },// 右上
+                            { x: 10, y: 10 },               // 左下
+                            { x: halfW + 10, y: 10 }        // 右下
+                        ];
+
+                        for (let j = 0; j < 4; j++) {
+                            if (i + j < pageCount) {
+                                const pos = positions[j];
+                                await drawEmbeddedFit(outDoc, newPage, srcDoc, i + j, pos.x, pos.y, halfW - 20, halfH - 20);
+                            }
+                        }
+                    }
+                }
+
+                const outBytes = await outDoc.save();
+                const blob = new Blob([outBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `mybanddown_layout_${currentFileName}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                statusBox.innerHTML = '🎉 併頁處理完成！已自動觸發檔案下載。';
+                showToast();
+
+            } catch (err) {
+                alert('PDF 處理失敗：' + err.message);
+                statusBox.innerText = '❌ 處理失敗，請重試。';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 保持比例居中繪製嵌入頁面 (Aspect-Fit)
+        async function drawEmbeddedFit(outDoc, targetPage, srcDoc, pageIndex, x, y, maxW, maxH) {
+            const [embedded] = await outDoc.embedPdf(srcDoc, [pageIndex]);
+            const srcSize = srcDoc.getPage(pageIndex).getSize();
+            const scale = Math.min(maxW / srcSize.width, maxH / srcSize.height);
+            const drawW = srcSize.width * scale;
+            const drawH = srcSize.height * scale;
+
+            // 居中偏移計算
+            const offsetX = x + (maxW - drawW) / 2;
+            const offsetY = y + (maxH - drawH) / 2;
+
+            targetPage.drawPage(embedded, {
+                x: offsetX,
+                y: offsetY,
+                width: drawW,
+                height: drawH
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toastNotify');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>午餐與下午茶決策幸運轉盤 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【午餐與下午茶決策幸運轉盤】工具，支援連鎖便當與飲料店菜單、自訂選項、Web Audio 原生音效與中獎彈窗。100% 免費本機運算不上傳。">
+    <meta name="keywords" content="午餐吃什麼,幸運轉盤,決策轉盤,飲料轉盤,隨機抽籤,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-101-wheel.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 標準顯式引入 CSS 標籤，解決本機 file:// 開啟時 CSS 消失的問題 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .wheel-page-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.875rem;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 1.25rem;
+        }
+        .wheel-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-bg, #ffffff);
+            padding: 1.5625rem;
+            border-radius: 0.75rem;
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            max-width: 100%;
+        }
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 1.125rem solid transparent;
+            border-right: 1.125rem solid transparent;
+            border-top: 2rem solid #ea580c;
+            position: absolute;
+            top: 0.9375rem;
+            z-index: 10;
+        }
+        canvas {
+            border-radius: 50%;
+            max-width: 100%;
+            height: auto;
+        }
+        .btn-spin {
+            margin-top: 1.25rem;
+            padding: 0.75rem 2.8125rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+            background: #ea580c;
+            border: none;
+            border-radius: 1.5625rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-spin:hover {
+            background: #c2410c;
+        }
+        .btn-spin:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .control-panel {
+            background: var(--card-bg, #ffffff);
+            padding: 1.5625rem;
+            border-radius: 0.75rem;
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            width: 100%;
+            max-width: 25rem;
+        }
+        textarea {
+            width: 100%;
+            height: 11.25rem;
+            background: var(--input-bg, #f8fafc);
+            color: var(--body-text, #1e293b);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 0.9375rem;
+        }
+        .preset-tag {
+            background-color: var(--panel-bg, #e8ecef);
+            color: var(--body-text, #495057);
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.9375rem;
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-tag:hover {
+            background-color: #ea580c;
+            color: #ffffff;
+        }
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .result-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .result-card {
+            background: var(--card-bg, #ffffff);
+            padding: 2.1875rem 1.875rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 22.5rem;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 午餐吃什麼幸運轉盤</li>
+            </ol>
+        </nav>
+
+        <div class="wheel-page-container">
+            <!-- 左側：轉盤本體 -->
+            <div class="wheel-box">
+                <div class="pointer" aria-hidden="true"></div>
+                <canvas id="wheelCanvas" width="420" height="420" role="img" aria-label="幸運轉盤動態繪製圖形"></canvas>
+                <button type="button" class="btn-spin" id="spinBtn" title="點擊觸發轉盤旋轉進行隨機決策" onclick="spinWheel()">開始旋轉！</button>
+            </div>
+
+            <!-- 右側：自訂選項與範本 -->
+            <div class="control-panel">
+                <h1 style="font-size: 1.25rem; color: var(--title-blue, #1e293b); margin-bottom: 0.75rem;">🎡 午餐/下午茶決策幸運轉盤</h1>
+                
+                <label for="optionsInput" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text, #64748b); margin-bottom:0.5rem; display:block;">請輸入轉盤選項 (每行一個品項)：</label>
+                <textarea id="optionsInput" name="optionsInput" title="請輸入轉盤選項，每行代表一個獨立項目" oninput="updateWheelOptions()">排骨便當
+雞腿便當
+牛肉麵
+日式拉麵
+韓式鍋物
+超商便當</textarea>
+
+                <div style="margin-bottom: 0.9375rem;">
+                    <label style="font-size:0.9rem; color:var(--desc-text, #475569); cursor:pointer;">
+                        <input type="checkbox" id="soundToggle" title="勾選以啟用轉盤旋轉與中獎音效" checked> 🔊 啟用轉盤音效
+                    </label>
+                </div>
+
+                <div>
+                    <span style="font-size:0.9rem; font-weight:bold; color:var(--desc-text, #64748b); display:block; margin-bottom:0.375rem;">快速套用熱門選單範本：</span>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button type="button" class="preset-tag" title="套用熱門午餐便當菜單範本" onclick="applyPreset(['排骨便當', '雞腿便當', '牛肉麵', '日式拉麵', '韓式鍋物', '超商便當'])">🍱 經典午餐</button>
+                        <button type="button" class="preset-tag" title="套用熱門下午茶飲料店範本" onclick="applyPreset(['珍珠奶茶', '四季春青茶', '檸檬生椰拿鐵', '黑糖珍珠鮮奶', '水果茶'])">🧋 熱門飲料</button>
+                        <button type="button" class="preset-tag" title="套用派對團康遊戲懲罰範本" onclick="applyPreset(['真心話', '大冒險', '請喝飲料', '安全過關', '指定一人表演'])">🍻 派對懲罰</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 中獎結果彈窗 Modal -->
+    <div class="result-modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="result-card">
+            <h2 id="modalTitle" style="color: var(--desc-text, #64748b); font-size: 1.1rem; margin-bottom: 0.625rem;">🎉 幸運轉盤抽籤結果</h2>
+            <div id="resultText" style="font-size: 2.2rem; font-weight: bold; color: #ea580c; margin-bottom: 1.5625rem;" role="status" aria-live="polite">--</div>
+            <!-- 🌟 修正點：修復 cursor:cursor; 語法錯誤為 cursor:pointer; -->
+            <button type="button" style="padding:0.625rem 1.875rem; background:#ea580c; color:#fff; border:none; border-radius:1.25rem; font-weight:bold; cursor:pointer;" title="點擊確認並關閉中獎結果彈窗" onclick="closeResultModal()">太棒了！</button>
+        </div>
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const soundToggle = document.getElementById('soundToggle');
+        
+        let options = [];
+        let startAngle = 0;
+        let isSpinning = false;
+        let lastSegmentIndex = -1;
+
+        const colors = ['#ea580c', '#3f51b5', '#4caf50', '#ffc107', '#00bcd4', '#9c27b0', '#e91e63', '#009688'];
+        
+        // 延遲宣告 AudioContext 避免自動播放警告
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTickSound() {
+            if (!soundToggle.checked) return;
+            const ctxAudio = getAudioContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, ctxAudio.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(120, ctxAudio.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.15, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.04);
+            osc.connect(gain); gain.connect(ctxAudio.destination);
+            osc.start(); osc.stop(ctxAudio.currentTime + 0.04);
+        }
+
+        function playWinSound() {
+            if (!soundToggle.checked) return;
+            const ctxAudio = getAudioContext();
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                const startTime = ctxAudio.currentTime + idx * 0.08;
+                gain.gain.setValueAtTime(0.2, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(startTime); osc.stop(startTime + 0.3);
+            });
+        }
+
+        function updateWheelOptions() {
+            const text = document.getElementById('optionsInput').value;
+            options = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const numOptions = options.length;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 12;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (numOptions === 0) return;
+            const arcSize = (2 * Math.PI) / numOptions;
+
+            options.forEach((opt, i) => {
+                const angle = startAngle + i * arcSize;
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px sans-serif';
+                ctx.translate(centerX + Math.cos(angle + arcSize / 2) * (radius * 0.68), centerY + Math.sin(angle + arcSize / 2) * (radius * 0.68));
+                ctx.rotate(angle + arcSize / 2 + Math.PI / 2);
+                const displayOpt = opt.length > 8 ? opt.substring(0, 8) + '...' : opt;
+                ctx.fillText(displayOpt, -ctx.measureText(displayOpt).width / 2, 0);
+                ctx.restore();
+            });
+        }
+
+        function spinWheel() {
+            if (isSpinning || options.length === 0) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            const numOptions = options.length;
+            const arcSize = (2 * Math.PI) / numOptions;
+            const totalRotation = Math.PI * 2 * (5 + Math.floor(Math.random() * 4)) + Math.random() * Math.PI * 2;
+            const duration = 4000;
+            const startTimestamp = performance.now();
+            const initialStartAngle = startAngle;
+
+            function animate(now) {
+                const elapsed = now - startTimestamp;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                startAngle = initialStartAngle + totalRotation * easeOut;
+                drawWheel();
+
+                const currentDegrees = (startAngle % (Math.PI * 2));
+                const currentSegment = Math.floor((Math.PI * 2 - (currentDegrees % (Math.PI * 2)) + Math.PI * 1.5) % (Math.PI * 2) / arcSize);
+                if (currentSegment !== lastSegmentIndex) {
+                    playTickSound();
+                    lastSegmentIndex = currentSegment;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    const winningIndex = Math.floor((Math.PI * 2 - (startAngle % (Math.PI * 2)) + Math.PI * 1.5) % (Math.PI * 2) / arcSize);
+                    playWinSound();
+                    showResult(options[winningIndex]);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function applyPreset(presetArr) {
+            document.getElementById('optionsInput').value = presetArr.join('\n');
+            updateWheelOptions();
+        }
+
+        function showResult(value) {
+            document.getElementById('resultText').innerText = value;
+            document.getElementById('resultModal').classList.add('active');
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", updateWheelOptions);
+    </script>
+</body>
+</html>

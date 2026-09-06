@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上圖片裁切縮放與尺寸修改工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【圖片裁切縮放與尺寸修改】工具，支援常用比例裁切、旋轉、尺寸調整與格式轉換。100% 免費本機純前端運算不上傳。">
+    <meta name="keywords" content="圖片裁切,圖片壓縮,尺寸修改,大頭貼裁切,圖片旋轉,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/04-402-img-editor.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .editor-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .editor-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .editor-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .editor-stage-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+            overflow: auto;
+        }
+
+        /* 🌟 無障礙聚焦與拖曳高亮樣式 */
+        .drop-zone {
+            border: 0.125rem dashed #ea580c;
+            border-radius: 0.5rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            background: var(--panel-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover { 
+            background: #fff7ed; 
+            border-color: #c2410c;
+            outline: 0.2rem solid #ea580c;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn-action {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+            width: 100%;
+        }
+        .btn-action:hover, .btn-action:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+        .btn-action:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        .btn-secondary {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover, .btn-secondary:focus-visible { 
+            border-color: #ea580c; 
+            color: #ea580c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上圖片裁切縮放與尺寸修改工具</li>
+            </ol>
+        </nav>
+
+        <div class="editor-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                ✂️ 線上圖片裁切縮放與尺寸修改工具
+            </h1>
+
+            <div class="editor-layout">
+                <!-- 左側：控制面板 -->
+                <div class="editor-panel">
+                    <!-- 🌟 拖曳與鍵盤聚焦區域 -->
+                    <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="點擊或拖曳圖片檔案至此處上傳" title="點擊或拖曳圖片至此" onclick="document.getElementById('fileInput').click()" onkeydown="handleDropKeydown(event)">
+                        <span style="font-size:2.5rem; display:block; margin-bottom:0.5rem;" aria-hidden="true">🖼️</span>
+                        <span style="font-weight:bold; color:var(--body-text);">點擊選擇或拖曳圖片至此</span>
+                        <span style="font-size:0.8rem; color:var(--desc-text); display:block; margin-top:0.25rem;">(支援 JPG、PNG、WebP，本機處理不上傳)</span>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="imgWidth" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">目標寬度 (px)：</label>
+                            <input type="number" id="imgWidth" class="form-control" title="請輸入修改後的圖片寬度" oninput="resizeByWidth()">
+                        </div>
+                        <div>
+                            <label for="imgHeight" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">目標高度 (px)：</label>
+                            <input type="number" id="imgHeight" class="form-control" title="請輸入修改後的圖片高度" oninput="resizeByHeight()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                            <input type="checkbox" id="keepAspect" checked title="勾選以維持圖片原始寬高比例"> 🔗 鎖定原始寬高比例
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.375rem;">圖片旋轉與翻轉：</label>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" class="btn-secondary" title="順時針旋轉 90 度" onclick="rotateImage(90)">🔄 旋轉 90°</button>
+                            <button type="button" class="btn-secondary" title="水平左右翻轉" onclick="flipImage('h')">↔️ 水平翻轉</button>
+                            <button type="button" class="btn-secondary" title="垂直上下翻轉" onclick="flipImage('v')">↕️ 垂直翻轉</button>
+                            <button type="button" class="btn-secondary" title="重置為原始圖片狀態" onclick="resetEditor()">↺ 重置</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imgFormat" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">匯出格式：</label>
+                        <select id="imgFormat" class="form-control" title="請選擇匯出圖片格式">
+                            <option value="image/png" selected>PNG (無損高品質)</option>
+                            <option value="image/jpeg">JPG (壓縮體積小)</option>
+                            <option value="image/webp">WebP (網頁高效格式)</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-action" id="downloadBtn" disabled title="下載編輯後的圖片" onclick="downloadImage()">⬇️ 下載編輯圖片</button>
+                    </div>
+                </div>
+
+                <!-- 右側：畫布展台 -->
+                <div class="editor-stage-box">
+                    <div id="statusBox" role="status" aria-live="polite" style="color:var(--desc-text); font-weight:bold;">
+                        請在左側上傳圖片以開始調整尺寸與旋轉！
+                    </div>
+                    <canvas id="editorCanvas" role="img" aria-label="圖片編輯與尺寸預覽展台" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與編輯優勢
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具可協助您迅速縮放像素尺寸、鎖定比例修改寬高、進行 90 度旋轉或水平/垂直鏡像翻轉，並可自訂匯出格式（PNG / JPG / WebP）。所有圖像渲染運算皆於本機瀏覽器進行，資料 100% 機密安全不上傳。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast (具備無障礙宣言) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功下載編輯後的圖片！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let canvas, ctx;
+        let loadedImage = null;
+        let currentRotation = 0;
+        let isFlipH = false;
+        let isFlipV = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('editorCanvas');
+            ctx = canvas.getContext('2d');
+
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    loadImageFile(e.dataTransfer.files[0]);
+                }
+            });
+        });
+
+        function handleDropKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (file) loadImageFile(file);
+        }
+
+        function loadImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('請選擇有效的圖片檔案 (JPG, PNG, WebP)！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    loadedImage = img;
+                    currentRotation = 0;
+                    isFlipH = false;
+                    isFlipV = false;
+
+                    document.getElementById('imgWidth').value = img.width;
+                    document.getElementById('imgHeight').value = img.height;
+
+                    renderCanvas();
+
+                    canvas.style.display = 'block';
+                    document.getElementById('statusBox').style.display = 'none';
+                    document.getElementById('downloadBtn').disabled = false;
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resizeByWidth() {
+            if (!loadedImage) return;
+            const w = parseInt(document.getElementById('imgWidth').value, 10);
+            if (!w) return;
+
+            if (document.getElementById('keepAspect').checked) {
+                const aspect = loadedImage.height / loadedImage.width;
+                document.getElementById('imgHeight').value = Math.round(w * aspect);
+            }
+            renderCanvas();
+        }
+
+        function resizeByHeight() {
+            if (!loadedImage) return;
+            const h = parseInt(document.getElementById('imgHeight').value, 10);
+            if (!h) return;
+
+            if (document.getElementById('keepAspect').checked) {
+                const aspect = loadedImage.width / loadedImage.height;
+                document.getElementById('imgWidth').value = Math.round(h * aspect);
+            }
+            renderCanvas();
+        }
+
+        function rotateImage(deg) {
+            currentRotation = (currentRotation + deg) % 360;
+            renderCanvas();
+        }
+
+        function flipImage(dir) {
+            if (dir === 'h') isFlipH = !isFlipH;
+            if (dir === 'v') isFlipV = !isFlipV;
+            renderCanvas();
+        }
+
+        function resetEditor() {
+            if (!loadedImage) return;
+            currentRotation = 0;
+            isFlipH = false;
+            isFlipV = false;
+            document.getElementById('imgWidth').value = loadedImage.width;
+            document.getElementById('imgHeight').value = loadedImage.height;
+            renderCanvas();
+        }
+
+        function renderCanvas() {
+            if (!loadedImage) return;
+
+            const targetW = parseInt(document.getElementById('imgWidth').value, 10) || loadedImage.width;
+            const targetH = parseInt(document.getElementById('imgHeight').value, 10) || loadedImage.height;
+
+            if (currentRotation % 180 !== 0) {
+                canvas.width = targetH;
+                canvas.height = targetW;
+            } else {
+                canvas.width = targetW;
+                canvas.height = targetH;
+            }
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((currentRotation * Math.PI) / 180);
+            ctx.scale(isFlipH ? -1 : 1, isFlipV ? -1 : 1);
+
+            ctx.drawImage(
+                loadedImage,
+                -targetW / 2,
+                -targetH / 2,
+                targetW,
+                targetH
+            );
+
+            ctx.restore();
+
+            canvas.setAttribute('aria-label', `圖片預覽，目前解析度為 ${canvas.width} x ${canvas.height} 像素`);
+        }
+
+        function downloadImage() {
+            if (!loadedImage || !canvas) return;
+
+            const format = document.getElementById('imgFormat').value;
+            const ext = format.split('/')[1];
+
+            // 若導出 JPG，先建立備用 Canvas 填補白色背景
+            let downloadDataUrl = '';
+            if (format === 'image/jpeg') {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = '#ffffff';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(canvas, 0, 0);
+                downloadDataUrl = tempCanvas.toDataURL(format, 0.92);
+            } else {
+                downloadDataUrl = canvas.toDataURL(format, 0.92);
+            }
+
+            const link = document.createElement('a');
+            link.download = `mybanddown_edited.${ext}`;
+            link.href = downloadDataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const toast = document.getElementById('toastNotify');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+    </script>
+</body>
+</html>

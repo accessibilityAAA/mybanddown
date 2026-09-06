@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上統一發票對獎與獎金試算工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【統一發票對獎與獎金試算】工具，支援末三碼極速對獎、特別獎、頭獎與扣稅金額實領試算。100% 免費本機純前端運算。">
+    <meta name="keywords" content="發票對獎,統一發票,發票號碼,發票末三碼,中獎金額,發票扣稅,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-505-invoice-winning.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .invoice-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .invoice-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .invoice-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .invoice-result-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .input-group-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .quick-input {
+            width: 100%;
+            font-size: 2rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 0.25rem;
+            padding: 0.75rem;
+            color: #ea580c;
+            background: var(--input-bg, #ffffff);
+            border: 0.125rem solid #ea580c;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .quick-input:focus-visible {
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .winning-list {
+            background: var(--card-bg);
+            border: 0.0625rem solid var(--border-light);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .btn-check {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-top: 0.75rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-check:hover, .btn-check:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-reset {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.875rem 1rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin-top: 0.75rem;
+        }
+        .btn-reset:hover, .btn-reset:focus-visible {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 28rem) {
+            .quick-input {
+                font-size: 1.5rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上統一發票對獎與獎金試算工具</li>
+            </ol>
+        </nav>
+
+        <div class="invoice-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🧾 線上統一發票對獎與獎金試算工具
+            </h1>
+
+            <div class="invoice-layout">
+                <!-- 左側：輸入對獎區 -->
+                <div class="invoice-panel">
+                    <label for="invoiceNum" style="font-size:0.95rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.5rem; display:block;">
+                        ⚡ 輸入發票號碼 (可僅輸入末 3 碼或 8 位全碼)：
+                    </label>
+
+                    <input type="text" id="invoiceNum" class="quick-input" maxlength="8" placeholder="輸入末 3 碼" title="請輸入發票末 3 碼或完整 8 碼" oninput="checkInvoice()">
+
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="button" class="btn-check" title="點擊比對中獎結果" onclick="checkInvoice()">
+                            🔍 即時比對對獎
+                        </button>
+                        <button type="button" class="btn-reset" title="清空號碼" onclick="resetInvoiceInput()">
+                            🧹 清空
+                        </button>
+                    </div>
+
+                    <div style="margin-top:1.25rem;">
+                        <span style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.375rem;">目前載入期別中獎號碼：</span>
+                        <div class="winning-list">
+                            <strong>特別獎 (1000萬)：</strong><span style="color:#ea580c; font-weight:bold;">86396830</span><br>
+                            <strong>特獎 (200萬)：</strong><span style="color:#ea580c; font-weight:bold;">20260228</span><br>
+                            <strong>頭獎 (20萬)：</strong><br>
+                            • 12345<span style="color:#ea580c; font-weight:bold;">678</span><br>
+                            • 23456<span style="color:#ea580c; font-weight:bold;">789</span><br>
+                            • 34567<span style="color:#ea580c; font-weight:bold;">890</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：結果展示 (具備無障礙狀態) -->
+                <div class="invoice-result-box" id="resultBox" role="status" aria-live="polite">
+                    <div style="text-align:center; padding:1.5rem 0;">
+                        <div id="statusTitle" style="font-size:1.25rem; font-weight:bold; color:var(--desc-text);">請在左側輸入發票末 3 碼</div>
+                        <div id="prizeDetail" style="font-size:1.75rem; font-weight:900; color:#ea580c; margin-top:0.5rem;">---</div>
+                        <div id="taxDetail" style="font-size:0.9rem; color:var(--desc-text); margin-top:0.5rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與發票領獎扣稅規定
+                </h2>
+                <p style="max-width:40ch;">
+                    根據財政部規定，統一發票中獎金額在 NT$5,000 元（含）以下者，免扣繳所得稅；超過 NT$5,000 元者，需扣繳 20% 所得稅與 0.4% 印花稅。本工具支援末 3 碼快速篩檢，不需登入即可秒速完成對獎！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        const winningData = {
+            special: "86396830",
+            grand: "20260228",
+            first: ["12345678", "23456789", "34567890"]
+        };
+
+        function resetInvoiceInput() {
+            const input = document.getElementById('invoiceNum');
+            input.value = '';
+            input.focus();
+            checkInvoice();
+        }
+
+        function checkInvoice() {
+            const input = document.getElementById('invoiceNum').value.trim();
+            const statusTitle = document.getElementById('statusTitle');
+            const prizeDetail = document.getElementById('prizeDetail');
+            const taxDetail = document.getElementById('taxDetail');
+
+            if (!input) {
+                statusTitle.innerText = "請在左側輸入發票末 3 碼";
+                prizeDetail.innerText = "---";
+                prizeDetail.style.color = "#ea580c";
+                taxDetail.innerText = "";
+                return;
+            }
+
+            const len = input.length;
+            if (len < 3) {
+                statusTitle.innerText = "請繼續輸入至末 3 碼";
+                prizeDetail.innerText = "---";
+                prizeDetail.style.color = "#ea580c";
+                taxDetail.innerText = "";
+                return;
+            }
+
+            let hit = false;
+            let prizeName = "";
+            let prizeAmount = 0;
+
+            if (len === 8) {
+                if (input === winningData.special) {
+                    hit = true; prizeName = "特別獎！"; prizeAmount = 10000000;
+                } else if (input === winningData.grand) {
+                    hit = true; prizeName = "特獎！"; prizeAmount = 2000000;
+                }
+            }
+
+            if (!hit) {
+                winningData.first.forEach(num => {
+                    if (num.endsWith(input)) {
+                        hit = true;
+                        if (len === 8 && num === input) {
+                            prizeName = "頭獎！"; prizeAmount = 200000;
+                        } else if (len >= 7 && num.endsWith(input.slice(-7))) {
+                            prizeName = "二獎！"; prizeAmount = 40000;
+                        } else if (len >= 6 && num.endsWith(input.slice(-6))) {
+                            prizeName = "三獎！"; prizeAmount = 10000;
+                        } else if (len >= 5 && num.endsWith(input.slice(-5))) {
+                            prizeName = "四獎！"; prizeAmount = 4000;
+                        } else if (len >= 4 && num.endsWith(input.slice(-4))) {
+                            prizeName = "五獎！"; prizeAmount = 1000;
+                        } else {
+                            prizeName = "六獎 (末3碼中獎)！"; prizeAmount = 200;
+                        }
+                    }
+                });
+            }
+
+            if (hit) {
+                statusTitle.innerText = "🎉 恭喜中獎！";
+                prizeDetail.innerText = `${prizeName} (獎金 $${prizeAmount.toLocaleString()} 元)`;
+                prizeDetail.style.color = "#22c55e";
+
+                // 計算扣稅
+                if (prizeAmount > 5000) {
+                    const tax = prizeAmount * 0.20;
+                    const stamp = prizeAmount * 0.004;
+                    const net = prizeAmount - tax - stamp;
+                    taxDetail.innerText = `扣除所得稅 (20%) 及印花稅 (0.4%): $${(tax + stamp).toLocaleString()} | 實領約: $${net.toLocaleString()} 元`;
+                } else {
+                    taxDetail.innerText = "免扣所得稅與印花稅，可實領全額獎金！";
+                }
+            } else {
+                statusTitle.innerText = "❌ 未中獎";
+                prizeDetail.innerText = "再接再厲！";
+                prizeDetail.style.color = "#ef4444";
+                taxDetail.innerText = "";
+            }
+        }
+    </script>
+</body>
+</html>

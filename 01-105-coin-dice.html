@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微舒壓功德木魚、氣泡紙與 3D 擲筊 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【微舒壓功德木魚、氣泡紙與 3D 擲筊】工具，提供積功德木魚、無限按壓氣泡紙、聖杯線上問事與 Esc 老闆來了一鍵偽裝。100% 本機極速運算。">
+    <meta name="keywords" content="功德木魚,氣泡紙,線上擲筊,老闆來了,BossKey,上班族舒壓,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-105-coin-dice.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .relax-container {
+            max-width: 50rem;
+            margin: 1.25rem auto;
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+        }
+        .tab-group {
+            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.25rem;
+        }
+        .tab-btn {
+            background: var(--panel-bg); border: 0.0625rem solid var(--border-light); color: var(--body-text); padding: 0.625rem 1.25rem; border-radius: 1.5rem; font-size: 0.95rem; font-weight: bold; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #ea580c; color: #ffffff !important; border-color: #ea580c;
+        }
+        .module-stage {
+            background: var(--panel-bg, #f8fafc); border: 0.125rem dashed var(--border-light, #cbd5e1); border-radius: 0.75rem; padding: 2rem 1rem; min-height: 22.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        }
+        
+        /* 🪵 模組 1: 木魚 (改用 button 增強無障礙可聚焦性) */
+        .muyu-btn {
+            background: transparent; border: none; font-size: 7rem; cursor: pointer; user-select: none; transition: transform 0.08s ease; display: inline-block; outline: none; border-radius: 1rem; padding: 0.5rem;
+        }
+        .muyu-btn:active, .muyu-btn:focus-visible { transform: scale(0.92); }
+        .floating-text {
+            position: absolute; font-size: 1.5rem; font-weight: bold; color: #ea580c; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-3.75rem); }
+        }
+
+        /* 🫧 模組 2: 氣泡紙 */
+        .bubble-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr)); gap: 0.625rem; width: 100%; max-width: 31.25rem; margin: 0 auto;
+        }
+        .bubble {
+            width: 3.5rem; height: 3.5rem; background: radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6); border-radius: 50%; cursor: pointer; box-shadow: 0 0.25rem 0.375rem rgba(0,0,0,0.15); transition: all 0.1s; border: none; outline: none;
+        }
+        .bubble:focus-visible { outline: 0.2rem solid #ea580c; }
+        .bubble.popped {
+            background: #cbd5e1; box-shadow: inset 0 0.125rem 0.25rem rgba(0,0,0,0.2); transform: scale(0.95); cursor: default;
+        }
+
+        /* 🧧 模組 3: 3D 擲筊 */
+        .bamboo-container {
+            display: flex; gap: 2rem; perspective: 31.25rem; margin-bottom: 1.25rem; justify-content: center;
+        }
+        .jiao-block {
+            width: 5rem; height: 7.5rem; background: #dc2626; border-radius: 5rem 0 5rem 0; border: 0.125rem solid #991b1b; transition: transform 0.6s ease; transform-style: preserve-3d;
+        }
+        .jiao-block.flat { transform: rotateY(180deg); background: #ef4444; }
+
+        /* ⚡ BossKey 老闆來了偽裝覆蓋層 */
+        .boss-fake-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; color: #000000; z-index: 99999; display: none; font-family: sans-serif; padding: 1rem; overflow: auto;
+        }
+        .excel-table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;
+        }
+        .excel-table td, .excel-table th { border: 0.0625rem solid #cbd5e1; padding: 0.375rem 0.625rem; }
+        .excel-table th { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 微舒壓功德木魚與 3D 擲筊</li>
+            </ol>
+        </nav>
+
+        <div class="relax-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+                <h1 style="font-size:1.35rem; color:var(--title-blue); margin:0;">🪵 微舒壓功德木魚與老闆來了偽裝</h1>
+                <button type="button" title="按下 Esc 鍵或點擊此處可瞬間切換為假 Excel 工作表" onclick="toggleBossKey()" style="background:#16a34a; color:#fff; border:none; padding:0.375rem 0.875rem; border-radius:1rem; font-size:0.85rem; font-weight:bold; cursor:pointer;">⚡ BossKey 老闆來了 (Esc)</button>
+            </div>
+
+            <!-- 切換 Tab (含完整 WCAG 語意) -->
+            <div class="tab-group" role="tablist" aria-label="舒壓工具模組切換">
+                <button type="button" class="tab-btn active" role="tab" aria-selected="true" title="切換至電子功德木魚模組" onclick="switchModule('muyu', this)">🪵 電子木魚</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至無限爆破氣泡紙模組" onclick="switchModule('bubble', this)">🫧 爆破氣泡紙</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至 3D 線上擲筊問事模組" onclick="switchModule('jiao', this)">🧧 3D 擲筊問事</button>
+            </div>
+
+            <!-- 舞台畫布 -->
+            <div class="module-stage" id="stage">
+                
+                <!-- 🪵 模組 1: 電子木魚 -->
+                <div id="muyuModule" style="text-align:center;">
+                    <button type="button" class="muyu-btn" id="muyuBtn" title="點擊或按下 Enter 敲擊木魚積功德" aria-label="敲擊木魚" onclick="tapMuyu(event)">🪵</button>
+                    <div style="font-size:1.25rem; font-weight:bold; color:var(--body-text); margin-top:1rem;">
+                        累積功德：<span id="muyuCount" style="color:#ea580c;">0</span>
+                    </div>
+                </div>
+
+                <!-- 🫧 模組 2: 氣泡紙 -->
+                <div id="bubbleModule" style="display:none; text-align:center; width:100%;">
+                    <div style="margin-bottom:0.75rem; font-size:0.9rem; color:var(--desc-text);">按下氣泡極致舒壓！按完會自動補充新氣泡。</div>
+                    <div class="bubble-grid" id="bubbleGrid" role="group" aria-label="氣泡紙區域"></div>
+                </div>
+
+                <!-- 🧧 模組 3: 3D 擲筊 -->
+                <div id="jiaoModule" style="display:none; text-align:center;">
+                    <div class="bamboo-container">
+                        <div class="jiao-block" id="jiao1"></div>
+                        <div class="jiao-block" id="jiao2"></div>
+                    </div>
+                    <div id="jiaoResult" style="font-size:1.5rem; font-weight:bold; color:#ea580c; margin-bottom:1rem;" role="status" aria-live="polite">誠心祈求，點擊擲筊</div>
+                    <button type="button" title="點擊進行 3D 線上擲筊問事" onclick="tossJiao()" style="background:#ea580c; color:#fff; border:none; padding:0.625rem 1.875rem; border-radius:1.25rem; font-size:1.05rem; font-weight:bold; cursor:pointer;">🧧 開始擲筊</button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ⚡ 假 Excel 報表 (BossKey) -->
+    <div class="boss-fake-screen" id="fakeScreen" onclick="toggleBossKey()" role="region" aria-label="假 Excel 偽裝畫面">
+        <div style="font-weight:bold; color:#166534; margin-bottom:0.5rem;">Microsoft Excel - Q3_Financial_Report_Final.xlsx</div>
+        <table class="excel-table">
+            <thead>
+                <tr><th>項目代碼</th><th>部門名稱</th><th>季度預算 (TWD)</th><th>實際支出 (TWD)</th><th>達成率 (%)</th><th>審核狀態</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>A-101</td><td>資訊研發部</td><td>$ 1,200,000</td><td>$ 1,150,000</td><td>95.8%</td><td>已核准</td></tr>
+                <tr><td>A-102</td><td>行銷企劃部</td><td>$ 850,000</td><td>$ 820,000</td><td>96.4%</td><td>已核准</td></tr>
+                <tr><td>A-103</td><td>行政總務課</td><td>$ 450,000</td><td>$ 410,000</td><td>91.1%</td><td>進行中</td></tr>
+                <tr><td>A-104</td><td>人力資源處</td><td>$ 600,000</td><td>$ 590,000</td><td>98.3%</td><td>已核准</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:1rem;">(提示：點擊畫面上任意位置或再按一次 Esc 即可切換回原本畫面)</p>
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let muyuCount = 0;
+        let soundCtx = null;
+
+        function getSoundContext() {
+            if (!soundCtx) {
+                soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (soundCtx.state === 'suspended') {
+                soundCtx.resume();
+            }
+            return soundCtx;
+        }
+
+        // 聲音引擎
+        function playSound(type) {
+            const ctxAudio = getSoundContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+
+            if (type === 'muyu') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, ctxAudio.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctxAudio.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.3, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.12);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(); osc.stop(ctxAudio.currentTime + 0.12);
+            } else if (type === 'pop') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800 + Math.random() * 400, ctxAudio.currentTime);
+                gain.gain.setValueAtTime(0.15, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.03);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(); osc.stop(ctxAudio.currentTime + 0.03);
+            }
+        }
+
+        // 切換模組
+        function switchModule(mod, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            document.getElementById('muyuModule').style.display = mod === 'muyu' ? 'block' : 'none';
+            document.getElementById('bubbleModule').style.display = mod === 'bubble' ? 'block' : 'none';
+            document.getElementById('jiaoModule').style.display = mod === 'jiao' ? 'block' : 'none';
+
+            if (mod === 'bubble' && document.getElementById('bubbleGrid').children.length === 0) {
+                initBubbles();
+            }
+        }
+
+        // 木魚積功德 (修復飄動 +1 位置)
+        function tapMuyu(e) {
+            muyuCount++;
+            document.getElementById('muyuCount').innerText = muyuCount;
+            playSound('muyu');
+
+            const muyuBtn = document.getElementById('muyuBtn');
+            const rect = muyuBtn.getBoundingClientRect();
+
+            const float = document.createElement('div');
+            float.className = 'floating-text';
+            float.innerText = '功德 +1';
+            
+            // 優先取得點擊座標，若無則精準從木魚中央發射
+            const posX = e && e.clientX ? e.clientX - 30 : rect.left + rect.width / 2 - 30;
+            const posY = e && e.clientY ? e.clientY - 40 : rect.top;
+
+            float.style.left = posX + 'px';
+            float.style.top = posY + 'px';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 800);
+        }
+
+        // 初始化氣泡紙
+        function initBubbles() {
+            const grid = document.getElementById('bubbleGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'bubble';
+                b.setAttribute('aria-label', `第 ${i + 1} 個氣泡`);
+                b.onclick = function() {
+                    if (!this.classList.contains('popped')) {
+                        this.classList.add('popped');
+                        this.disabled = true;
+                        playSound('pop');
+                        checkAllPopped();
+                    }
+                };
+                grid.appendChild(b);
+            }
+        }
+
+        function checkAllPopped() {
+            const remaining = document.querySelectorAll('.bubble:not(.popped)').length;
+            if (remaining === 0) {
+                setTimeout(() => {
+                    initBubbles();
+                }, 500);
+            }
+        }
+
+        // 3D 擲筊
+        function tossJiao() {
+            const j1 = document.getElementById('jiao1');
+            const j2 = document.getElementById('jiao2');
+
+            j1.style.transform = 'rotateX(720deg) rotateY(360deg)';
+            j2.style.transform = 'rotateX(720deg) rotateY(360deg)';
+
+            setTimeout(() => {
+                const state1 = Math.random() < 0.5; // true: 凸, false: 平
+                const state2 = Math.random() < 0.5;
+
+                j1.style.transform = state1 ? 'rotateY(0deg)' : 'rotateY(180deg)';
+                j2.style.transform = state2 ? 'rotateY(0deg)' : 'rotateY(180deg)';
+
+                let msg = '';
+                if (state1 !== state2) {
+                    msg = '🧧 聖杯！神明應允，大吉大利！';
+                } else if (state1 && state2) {
+                    msg = '🧧 陰杯！神明不允，請重新誠心思考。';
+                } else {
+                    msg = '🧧 笑杯！神明笑而不答，請再說明清楚。';
+                }
+                document.getElementById('jiaoResult').innerText = msg;
+            }, 600);
+        }
+
+        // BossKey 老闆來了
+        function toggleBossKey() {
+            const screen = document.getElementById('fakeScreen');
+            const isHidden = screen.style.display === 'none' || screen.style.display === '';
+            screen.style.display = isHidden ? 'block' : 'none';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                toggleBossKey();
+            }
+        });
+    </script>
+</body>
+</html>

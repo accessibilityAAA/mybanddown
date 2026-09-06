@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上高強度安全密碼產生器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【高強度安全密碼產生器】工具，支援自訂長度、排除混淆字元、密碼強度評估與一鍵複製。100% 免費本機純前端密碼學級運算不上傳。">
+    <meta name="keywords" content="密碼產生器,亂數密碼,高強度密碼,密碼安全,防駭密碼,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-504-pass-gen.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .pass-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .pass-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .pass-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .pass-result-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .pass-display-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .pass-display {
+            width: 100%;
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 1rem 2.5rem 1rem 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            color: #ea580c;
+            word-break: break-all;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .btn-toggle-mask {
+            position: absolute;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--desc-text);
+        }
+
+        .strength-bar-outer {
+            width: 100%;
+            height: 0.625rem;
+            background: #e2e8f0;
+            border-radius: 0.3125rem;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: #ef4444;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .btn-gen {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-gen:hover, .btn-gen:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-copy {
+            background: #64748b;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .btn-copy:hover, .btn-copy:focus-visible { 
+            background: #475569; 
+            outline: 0.2rem solid #64748b;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .pass-result-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上高強度安全密碼產生器</li>
+            </ol>
+        </nav>
+
+        <div class="pass-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🔐 線上高強度安全密碼產生器
+            </h1>
+
+            <div class="pass-layout">
+                <!-- 左側：設定控制面板 -->
+                <div class="pass-panel">
+                    <div class="form-group">
+                        <label for="passLength" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">
+                            密碼長度：<strong id="lengthDisplay" style="color:#ea580c;">16</strong> 字元
+                        </label>
+                        <input type="range" id="passLength" min="6" max="64" value="16" class="form-control" title="滑動調整密碼長度" oninput="document.getElementById('lengthDisplay').innerText = this.value; generatePassword();">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.875rem; color:var(--body-text); cursor:pointer; display:block; margin-bottom:0.375rem;">
+                            <input type="checkbox" id="incUpper" checked title="包含大寫英文字母 A-Z" onchange="generatePassword()"> 🔠 包含大寫字母 (A-Z)
+                        </label>
+                        <label style="font-size:0.875rem; color:var(--body-text); cursor:pointer; display:block; margin-bottom:0.375rem;">
+                            <input type="checkbox" id="incLower" checked title="包含小寫英文字母 a-z" onchange="generatePassword()"> 🔡 包含小寫字母 (a-z)
+                        </label>
+                        <label style="font-size:0.875rem; color:var(--body-text); cursor:pointer; display:block; margin-bottom:0.375rem;">
+                            <input type="checkbox" id="incNum" checked title="包含數字 0-9" onchange="generatePassword()"> 🔢 包含數字 (0-9)
+                        </label>
+                        <label style="font-size:0.875rem; color:var(--body-text); cursor:pointer; display:block; margin-bottom:0.375rem;">
+                            <input type="checkbox" id="incSym" checked title="包含特殊符號 (!@#$%^&*)" onchange="generatePassword()"> 🔣 包含特殊符號 (!@#$%^&*)
+                        </label>
+                        <label style="font-size:0.875rem; color:var(--body-text); cursor:pointer; display:block; margin-bottom:0.375rem;">
+                            <input type="checkbox" id="excAmb" checked title="剔除容易看錯混淆的字元 l, 1, I, O, 0" onchange="generatePassword()"> 🚫 排除易混淆字元 (l, 1, I, O, 0)
+                        </label>
+                    </div>
+
+                    <button type="button" class="btn-gen" title="點擊重新產生隨機高強度密碼" onclick="generatePassword()">
+                        🎲 重新產生隨機密碼
+                    </button>
+                </div>
+
+                <!-- 右側：結果展示區 (具備無障礙狀態) -->
+                <div class="pass-result-box" id="resultBox" role="status" aria-live="polite">
+                    <span style="font-size:0.875rem; font-weight:bold; color:var(--desc-text);">生成的隨機安全密碼：</span>
+                    
+                    <div class="pass-display-wrapper">
+                        <div class="pass-display" id="passwordOutput">------------</div>
+                        <button type="button" class="btn-toggle-mask" title="切換密碼顯示/隱藏狀態" aria-label="隱藏或顯示密碼" onclick="togglePasswordMask()">👁️</button>
+                    </div>
+
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:bold; color:var(--desc-text);">
+                            <span>密碼安全強度評估：</span>
+                            <span id="strengthText" style="color:#22c55e;">極度安全</span>
+                        </div>
+                        <div class="strength-bar-outer" role="progressbar" id="strengthBarOuter" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="密碼安全強度進度條">
+                            <div class="strength-bar-inner" id="strengthBar"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-copy" title="複製產生的安全密碼至剪貼簿" onclick="copyPassword()">
+                        📋 複製密碼至剪貼簿
+                    </button>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 安全承諾與防駭建議
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具採用瀏覽器原生的 <code>crypto.getRandomValues()</code> 密碼學級別隨機數生成演算法，確保密碼無法被預測。密碼僅在您的設備內存中瞬間生成，絕對不會通過網路傳輸或儲存。建議重要帳號使用 16 位以上並開啟雙重驗證 (2FA)！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast (具備無障礙宣言) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製安全密碼！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let rawPassword = "";
+        let isMasked = false;
+
+        function togglePasswordMask() {
+            isMasked = !isMasked;
+            renderPasswordDisplay();
+        }
+
+        function renderPasswordDisplay() {
+            const output = document.getElementById('passwordOutput');
+            if (!rawPassword || rawPassword.startsWith('請')) {
+                output.innerText = rawPassword;
+                return;
+            }
+            if (isMasked) {
+                output.innerText = "•".repeat(rawPassword.length);
+            } else {
+                output.innerText = rawPassword;
+            }
+        }
+
+        function getRandomInt(max) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            return array[0] % max;
+        }
+
+        function generatePassword() {
+            const length = parseInt(document.getElementById('passLength').value, 10);
+            const incUpper = document.getElementById('incUpper').checked;
+            const incLower = document.getElementById('incLower').checked;
+            const incNum = document.getElementById('incNum').checked;
+            const incSym = document.getElementById('incSym').checked;
+            const excAmb = document.getElementById('excAmb').checked;
+
+            let upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let lowerChars = "abcdefghijklmnopqrstuvwxyz";
+            let numChars = "0123456789";
+            let symChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+            if (excAmb) {
+                upperChars = upperChars.replace(/[IO]/g, '');
+                lowerChars = lowerChars.replace(/[l]/g, '');
+                numChars = numChars.replace(/[01]/g, '');
+            }
+
+            let categoryPools = [];
+            if (incUpper) categoryPools.push(upperChars);
+            if (incLower) categoryPools.push(lowerChars);
+            if (incNum) categoryPools.push(numChars);
+            if (incSym) categoryPools.push(symChars);
+
+            if (categoryPools.length === 0) {
+                rawPassword = "請至少選擇一種字元類型！";
+                renderPasswordDisplay();
+                document.getElementById('strengthText').innerText = "無";
+                document.getElementById('strengthBar').style.width = "0%";
+                document.getElementById('strengthBarOuter').setAttribute('aria-valuenow', '0');
+                return;
+            }
+
+            let passwordChars = [];
+
+            // 1. 強迫每個選擇類別至少包含一個字元
+            categoryPools.forEach(pool => {
+                passwordChars.push(pool[getRandomInt(pool.length)]);
+            });
+
+            // 2. 湊滿剩餘長度
+            const allChars = categoryPools.join('');
+            while (passwordChars.length < length) {
+                passwordChars.push(allChars[getRandomInt(allChars.length)]);
+            }
+
+            // 3. 費雪耶茲 (Fisher-Yates) 隨機打亂
+            for (let i = passwordChars.length - 1; i > 0; i--) {
+                const j = getRandomInt(i + 1);
+                [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
+            }
+
+            rawPassword = passwordChars.join('');
+            renderPasswordDisplay();
+
+            evalStrength(rawPassword, allChars.length);
+        }
+
+        function evalStrength(pwd, poolSize) {
+            if (!pwd || pwd.startsWith('請')) return;
+            const entropy = pwd.length * Math.log2(poolSize);
+
+            const bar = document.getElementById('strengthBar');
+            const barOuter = document.getElementById('strengthBarOuter');
+            const text = document.getElementById('strengthText');
+
+            let percent = Math.min(100, Math.round((entropy / 128) * 100));
+            bar.style.width = percent + '%';
+            barOuter.setAttribute('aria-valuenow', percent);
+
+            if (entropy < 35) {
+                bar.style.backgroundColor = '#ef4444';
+                text.innerText = '非常弱 (極易被破譯)';
+                text.style.color = '#ef4444';
+            } else if (entropy < 60) {
+                bar.style.backgroundColor = '#f97316';
+                text.innerText = '中等強度';
+                text.style.color = '#f97316';
+            } else if (entropy < 90) {
+                bar.style.backgroundColor = '#eab308';
+                text.innerText = '高強度';
+                text.style.color = '#eab308';
+            } else {
+                bar.style.backgroundColor = '#22c55e';
+                text.innerText = '極度安全 (極難破譯)';
+                text.style.color = '#22c55e';
+            }
+        }
+
+        function copyPassword() {
+            if (!rawPassword || rawPassword.startsWith('請')) return;
+
+            navigator.clipboard.writeText(rawPassword).then(() => {
+                const toast = document.getElementById('toastNotify');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', generatePassword);
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中英文假字假文產生器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【中英文假字假文產生器】(Lorem Ipsum)，專為 UI 設計師與前端開發打造，支援中文繁體、英文排版測試假文與 HTML 標籤。100% 免費本機純前端運算。">
+    <meta name="keywords" content="假字產生器,Lorem Ipsum,中文假文,排版測試,UI設計工具,前端開發,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-210-lorem-ipsum.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .lorem-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .lorem-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .lorem-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .lorem-preview-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 16rem;
+            background: var(--input-bg, #ffffff);
+            color: var(--body-text, #0f172a);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.875rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            outline: none;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-generate {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-generate:hover, .btn-generate:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-copy {
+            background: #64748b;
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-self: flex-end;
+        }
+        .btn-copy:hover, .btn-copy:focus-visible { 
+            background: #475569; 
+            outline: 0.2rem solid #64748b;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 中英文假字假文產生器</li>
+            </ol>
+        </nav>
+
+        <div class="lorem-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                📝 中英文假字假文產生器 (Lorem Ipsum Generator)
+            </h1>
+
+            <div class="lorem-layout">
+                <!-- 左側：控制面板 -->
+                <div class="lorem-panel">
+                    <div class="form-group">
+                        <label for="langType" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">假文語言：</label>
+                        <select id="langType" class="form-control" title="請選擇要產生的假字語言" onchange="generateText()">
+                            <option value="zh" selected>🇹🇼 中文繁體假字 (通用新聞風)</option>
+                            <option value="zh_art">🎨 中文繁體假字 (文青散文風)</option>
+                            <option value="en">🇺🇸 英文經典 (Lorem Ipsum)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="paraCount" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">段落數量：</label>
+                            <input type="number" id="paraCount" value="3" min="1" max="20" class="form-control" title="請輸入要產生的段落數量" oninput="generateText()">
+                        </div>
+                        <div>
+                            <label for="sentencePerPara" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">每段句數：</label>
+                            <input type="number" id="sentencePerPara" value="5" min="1" max="15" class="form-control" title="請輸入每個段落包含的句子數量" oninput="generateText()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                            <input type="checkbox" id="addHtmlTags" title="勾選以在每個段落前後包覆 HTML p 標籤" onchange="generateText()"> 🏷️ 自動包覆 HTML &lt;p&gt; 標籤
+                        </label>
+                    </div>
+
+                    <button type="button" class="btn-generate" title="點擊重新產生隨機假文" onclick="generateText()">🎲 重新產生假文</button>
+                </div>
+
+                <!-- 右側：即時預覽展台 -->
+                <div class="lorem-preview-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.9rem; font-weight:bold; color:var(--desc-text);">📋 產生結果展台</span>
+                        <button type="button" class="btn-copy" title="點擊複製產生的假文內容" onclick="copyText()">📋 複製假文</button>
+                    </div>
+
+                    <textarea id="resultText" readonly title="產生的測試假文結果" role="status" aria-live="polite"></textarea>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與應用場景
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具專為網頁開發者、UI/UX 設計師與平面排版人員打造，能快速充實尚未填入實際文案的設計版型。支援中文新聞語感、文青風格與標準英文 Latin 測試假字，並可一鍵匯出帶有 HTML 標籤的代碼！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 複製成功提示聲明 (具備螢幕報讀功能) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製測試假文！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        const zhWords = [
+            "在這個科技飛速發展的時代，我們不斷探索著數位轉型與人機互動的全新可能性。",
+            "隨著都市步調持續加快，人們開始尋求生活與工作之間的完美平衡感。",
+            "永續發展與綠色能源已成為全球企業必須面臨的重要課題與挑戰。",
+            "創新思維不僅僅是技術上的突破，更是對既有商業模式的深刻反思與重構。",
+            "良好的使用者體驗設計，能夠無形中提升產品的市場競爭力與使用者黏著度。",
+            "資料分析與人工智慧的結合，正在為傳統產業注入源源不絕的新鮮活力。",
+            "跨領域團隊的溝通與協作，往往是專案能否如期高質量交付的關鍵決定因素。"
+        ];
+
+        const zhArtWords = [
+            "微風吹過夏日的午後，窗外樹影斑駁地落在木質桌面上，靜謐而美好。",
+            "咖啡的香氣在空氣中漸漸蔓延，帶走了一整天的疲憊與焦慮感。",
+            "歲月如同一首輕柔的歌曲，在不經意間悄悄唱過了漫長的時光。",
+            "佇立於城市的一角，看著熙熙攘攘的人群，心中總有一抹平靜的角落。",
+            "文字是靈魂的寄託，每一個字句都承載著對生活的熱愛與深刻感悟。"
+        ];
+
+        const enWords = [
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            "Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.",
+            "Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris."
+        ];
+
+        function generateText() {
+            const lang = document.getElementById('langType').value;
+            let paraCount = parseInt(document.getElementById('paraCount').value, 10) || 3;
+            let sentenceCount = parseInt(document.getElementById('sentencePerPara').value, 10) || 5;
+            const addTags = document.getElementById('addHtmlTags').checked;
+
+            // 輸入防錯邊界保護
+            paraCount = Math.min(20, Math.max(1, paraCount));
+            sentenceCount = Math.min(15, Math.max(1, sentenceCount));
+
+            let sourceArr = zhWords;
+            if (lang === 'zh_art') sourceArr = zhArtWords;
+            if (lang === 'en') sourceArr = enWords;
+
+            let paragraphs = [];
+            for (let p = 0; p < paraCount; p++) {
+                let sentences = [];
+                for (let s = 0; s < sentenceCount; s++) {
+                    const randIndex = Math.floor(Math.random() * sourceArr.length);
+                    sentences.push(sourceArr[randIndex]);
+                }
+                let paraStr = sentences.join(lang === 'en' ? ' ' : '');
+                if (addTags) {
+                    paraStr = `<p>${paraStr}</p>`;
+                }
+                paragraphs.push(paraStr);
+            }
+
+            document.getElementById('resultText').value = paragraphs.join('\n\n');
+        }
+
+        function copyText() {
+            const val = document.getElementById('resultText').value;
+            if (!val) return;
+            navigator.clipboard.writeText(val).then(() => {
+                const toast = document.getElementById('toastNotify');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', generateText);
+    </script>
+</body>
+</html>

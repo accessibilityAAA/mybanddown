@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片隱私保護馬賽克與打碼遮罩工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【圖片隱私保護馬賽克與打碼遮罩】工具，支援像素馬賽克、模糊、黑框遮罩與手繪打碼，保護車牌與敏感資訊。100% 免費本機純前端運算不上傳。">
+    <meta name="keywords" content="圖片打碼,馬賽克工具,車牌遮蔽,隱私保護,圖片模糊,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/04-401-img-privacy.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .privacy-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .privacy-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .privacy-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .privacy-stage-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+            overflow: auto;
+        }
+
+        /* 🌟 無障礙聚焦與拖曳高亮樣式 */
+        .drop-zone {
+            border: 0.125rem dashed #ea580c;
+            border-radius: 0.5rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            background: var(--panel-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover { 
+            background: #fff7ed; 
+            border-color: #c2410c;
+            outline: 0.2rem solid #ea580c;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+            cursor: crosshair;
+            touch-action: none; /* 阻止手機塗鴉時滾動頁面 */
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn-action {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-action:hover, .btn-action:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+        .btn-action:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        .btn-secondary {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.75rem 1.25rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover, .btn-secondary:focus-visible { 
+            border-color: #ea580c; 
+            color: #ea580c; 
+            outline: 0.2rem solid #ea580c;
+        }
+        .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-action, .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 圖片隱私保護馬賽克與打碼遮罩工具</li>
+            </ol>
+        </nav>
+
+        <div class="privacy-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🖼️ 圖片隱私保護馬賽克與打碼遮罩工具
+            </h1>
+
+            <div class="privacy-layout">
+                <!-- 左側：控制面板 -->
+                <div class="privacy-panel">
+                    <!-- 🌟 拖曳與鍵盤聚焦區域 -->
+                    <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="點擊或拖曳圖片檔案至此處上傳" title="點擊或拖曳圖片至此" onclick="document.getElementById('fileInput').click()" onkeydown="handleDropKeydown(event)">
+                        <span style="font-size:2.5rem; display:block; margin-bottom:0.5rem;" aria-hidden="true">🖼️</span>
+                        <span style="font-weight:bold; color:var(--body-text);">點擊選擇或拖曳圖片至此</span>
+                        <span style="font-size:0.8rem; color:var(--desc-text); display:block; margin-top:0.25rem;">(支援 JPG、PNG、WebP，本機處理不上傳)</span>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maskMode" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">打碼模式：</label>
+                        <select id="maskMode" class="form-control" title="請選擇遮罩打碼類型">
+                            <option value="mosaic" selected>🏁 像素馬賽克 (Mosaic)</option>
+                            <option value="blur">🌫️ 高斯模糊 (Blur)</option>
+                            <option value="black">⬛ 黑色塊遮罩 (Black Box)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brushSize" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">
+                            畫筆大小：<strong id="brushSizeDisplay" style="color:#ea580c;">20</strong> px
+                        </label>
+                        <input type="range" id="brushSize" min="5" max="80" value="20" class="form-control" title="滑動調整打碼畫筆粗細" oninput="document.getElementById('brushSizeDisplay').innerText = this.value">
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary" id="resetBtn" disabled title="重設畫布至原始狀態" onclick="resetCanvas()">🔄 清空重來</button>
+                        <button type="button" class="btn-action" id="downloadBtn" disabled title="下載打碼後的圖片" onclick="downloadImage()">⬇️ 下載圖片</button>
+                    </div>
+                </div>
+
+                <!-- 右側：畫布展台 -->
+                <div class="privacy-stage-box">
+                    <div id="statusBox" role="status" aria-live="polite" style="color:var(--desc-text); font-weight:bold;">
+                        請在左側上傳圖片，即可用滑鼠或手指在圖片上劃過打碼！
+                    </div>
+                    <canvas id="imageCanvas" tabindex="0" aria-label="圖片打碼塗鴉畫布" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與隱私安全
+                </h2>
+                <p style="max-width:40ch;">
+                    專為保護社群分享圖片中的個資而設計，可精準遮蔽車牌、身分證件號碼、住址與臉部特徵。所有圖像塗鴉與馬賽克均在您的瀏覽器內部通過 HTML5 Canvas 完成，圖片絕不經過任何伺服器，100% 機密安全。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast (具備無障礙宣言) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功下載打碼後的圖片！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let canvas, ctx;
+        let originalImage = null;
+        let isDrawing = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('imageCanvas');
+            ctx = canvas.getContext('2d');
+
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    loadImageFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // 滑鼠事件
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            // 觸控支援 (防止滾動)
+            canvas.addEventListener('touchstart', (e) => { 
+                e.preventDefault();
+                startDrawing(e.touches[0]); 
+            }, { passive: false });
+            
+            canvas.addEventListener('touchmove', (e) => { 
+                e.preventDefault();
+                draw(e.touches[0]); 
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', stopDrawing);
+        });
+
+        function handleDropKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (file) loadImageFile(file);
+        }
+
+        function loadImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('請選擇有效的圖片檔案 (JPG, PNG, WebP)！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    canvas.style.display = 'block';
+                    document.getElementById('statusBox').style.display = 'none';
+                    document.getElementById('resetBtn').disabled = false;
+                    document.getElementById('downloadBtn').disabled = false;
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function startDrawing(e) {
+            if (!originalImage) return;
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing || !originalImage) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            const size = parseInt(document.getElementById('brushSize').value, 10);
+            const mode = document.getElementById('maskMode').value;
+
+            if (mode === 'black') {
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (mode === 'mosaic') {
+                applyMosaic(x, y, size);
+            } else if (mode === 'blur') {
+                applyBlur(x, y, size);
+            }
+        }
+
+        function applyMosaic(cx, cy, radius) {
+            const blockSize = 8;
+            const startX = Math.max(0, Math.floor(cx - radius));
+            const startY = Math.max(0, Math.floor(cy - radius));
+            const endX = Math.min(canvas.width, Math.ceil(cx + radius));
+            const endY = Math.min(canvas.height, Math.ceil(cy + radius));
+
+            for (let x = startX; x < endX; x += blockSize) {
+                for (let y = startY; y < endY; y += blockSize) {
+                    const dist = Math.hypot(x - cx, y - cy);
+                    if (dist <= radius) {
+                        const imgData = ctx.getImageData(x, y, 1, 1).data;
+                        ctx.fillStyle = `rgb(${imgData[0]}, ${imgData[1]}, ${imgData[2]})`;
+                        ctx.fillRect(x, y, blockSize, blockSize);
+                    }
+                }
+            }
+        }
+
+        function applyBlur(cx, cy, radius) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius / 2, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.filter = 'blur(8px)';
+            ctx.drawImage(canvas, 0, 0);
+            ctx.restore();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function resetCanvas() {
+            if (!originalImage) return;
+            ctx.drawImage(originalImage, 0, 0);
+        }
+
+        function downloadImage() {
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.download = 'mybanddown_masked.png';
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const toast = document.getElementById('toastNotify');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+    </script>
+</body>
+</html>

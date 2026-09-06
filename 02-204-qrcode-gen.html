@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上高畫質 QR Code 產生器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【QR Code 條碼產生器】工具，支援網址、Wi-Fi 密碼、文字轉碼、自訂顏色與高畫質 PNG 下載。100% 免費本機純前端運算不上傳。">
+    <meta name="keywords" content="QR Code產生器,免費QR Code,條碼製作,WiFi QR Code,網址轉條碼,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-204-qrcode-gen.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 輕量獨立 QRCode 庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .qr-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .qr-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .qr-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .qr-preview-box {
+            flex: 1 1 16rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+        }
+
+        #qrcodeCanvas {
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #qrcodeCanvas img, #qrcodeCanvas canvas {
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .color-picker-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-download {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.75rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-download:hover, .btn-download:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 28rem) {
+            .color-picker-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上高畫質 QR Code 產生器</li>
+            </ol>
+        </nav>
+
+        <div class="qr-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                📷 線上高畫質 QR Code 條碼產生器
+            </h1>
+
+            <div class="qr-layout">
+                <!-- 左側：輸入與客製化設定 -->
+                <div class="qr-panel">
+                    <div class="form-group">
+                        <label for="qrType" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">選擇轉碼類型：</label>
+                        <select id="qrType" class="form-control" title="請選擇要產生的條碼類型" onchange="toggleQrType()">
+                            <option value="url" selected>🌐 網址 (URL)</option>
+                            <option value="text">📝 純文字 (Text)</option>
+                            <option value="wifi">📶 Wi-Fi 網路密碼分享</option>
+                        </select>
+                    </div>
+
+                    <!-- 網址 / 純文字輸入 -->
+                    <div class="form-group" id="inputUrlGroup">
+                        <label for="qrInputText" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">輸入網址或內容：</label>
+                        <input type="text" id="qrInputText" class="form-control" title="請輸入要轉換為 QR Code 的網址或文字" value="https://www.mybanddown.com" placeholder="https://..." oninput="generateQRCode()">
+                    </div>
+
+                    <!-- Wi-Fi 輸入面板 -->
+                    <div id="inputWifiGroup" style="display:none;">
+                        <div class="form-group">
+                            <label for="wifiSsid" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">Wi-Fi 名稱 (SSID)：</label>
+                            <input type="text" id="wifiSsid" class="form-control" placeholder="請輸入 Wi-Fi 名稱" title="請輸入 Wi-Fi 熱點名稱" oninput="generateWifiQR()">
+                        </div>
+                        <div class="form-group">
+                            <label for="wifiPassword" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">Wi-Fi 密碼：</label>
+                            <input type="text" id="wifiPassword" class="form-control" placeholder="請輸入 Wi-Fi 密碼" title="請輸入 Wi-Fi 密碼" oninput="generateWifiQR()">
+                        </div>
+                    </div>
+
+                    <!-- 色彩設定 -->
+                    <div class="color-picker-grid">
+                        <div>
+                            <label for="qrColorDark" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">前景色 (條碼顏色)：</label>
+                            <input type="color" id="qrColorDark" value="#000000" class="form-control" style="height:2.5rem; cursor:pointer;" title="請選擇 QR Code 條碼前景色彩" onchange="generateQRCode()">
+                        </div>
+                        <div>
+                            <label for="qrColorLight" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">背景色：</label>
+                            <input type="color" id="qrColorLight" value="#ffffff" class="form-control" style="height:2.5rem; cursor:pointer;" title="請選擇 QR Code 背景色彩" onchange="generateQRCode()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qrSize" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">條碼尺寸 (像素)：</label>
+                        <select id="qrSize" class="form-control" title="請選擇要下載導出的圖檔尺寸" onchange="generateQRCode()">
+                            <option value="200">200 x 200 px (一般)</option>
+                            <option value="300" selected>300 x 300 px (推薦高畫質)</option>
+                            <option value="500">500 x 500 px (印刷用高解析)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 右側：實時預覽展台與下載按鈕 -->
+                <div class="qr-preview-box">
+                    <span style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:1rem;">📷 QR Code 實時條碼預覽</span>
+                    
+                    <div id="qrcodeCanvas" role="img" aria-label="實時生成的 QR Code 圖像"></div>
+
+                    <button type="button" class="btn-download" title="點擊下載高畫質 PNG 條碼圖檔" onclick="downloadQRCode()">
+                        ⬇️ 下載高畫質 PNG 圖檔
+                    </button>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與安全承諾
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具可將網址、文字或 Wi-Fi 密碼快速轉碼為標準 QR Code。輸出的圖片可直接用於文宣列印、店面菜單或個人名片。所有條碼製作皆於您的瀏覽器本機進行，100% 安全不上傳，絕對保障個人隱私！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let qrObj = null;
+
+        function toggleQrType() {
+            const type = document.getElementById('qrType').value;
+            const urlGroup = document.getElementById('inputUrlGroup');
+            const wifiGroup = document.getElementById('inputWifiGroup');
+
+            if (type === 'wifi') {
+                urlGroup.style.display = 'none';
+                wifiGroup.style.display = 'block';
+                generateWifiQR();
+            } else {
+                urlGroup.style.display = 'block';
+                wifiGroup.style.display = 'none';
+                generateQRCode();
+            }
+        }
+
+        function generateWifiQR() {
+            const ssid = document.getElementById('wifiSsid').value.trim();
+            const pass = document.getElementById('wifiPassword').value.trim();
+            const wifiText = `WIFI:S:${ssid};T:WPA;P:${pass};;`;
+            renderQR(wifiText);
+        }
+
+        function generateQRCode() {
+            const type = document.getElementById('qrType').value;
+            if (type === 'wifi') {
+                generateWifiQR();
+                return;
+            }
+            const text = document.getElementById('qrInputText').value.trim() || 'https://www.mybanddown.com';
+            renderQR(text);
+        }
+
+        function renderQR(text) {
+            const container = document.getElementById('qrcodeCanvas');
+            container.innerHTML = '';
+
+            const size = parseInt(document.getElementById('qrSize').value, 10);
+            const dark = document.getElementById('qrColorDark').value;
+            const light = document.getElementById('qrColorLight').value;
+
+            qrObj = new QRCode(container, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: dark,
+                colorLight: light,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            container.setAttribute('aria-label', `實時生成的 QR Code 條碼，圖像內容為：${text}`);
+        }
+
+        function downloadQRCode() {
+            const container = document.getElementById('qrcodeCanvas');
+            const img = container.querySelector('img');
+            const canvas = container.querySelector('canvas');
+
+            let imageSrc = '';
+            if (img && img.src && img.src.startsWith('data:image')) {
+                imageSrc = img.src;
+            } else if (canvas) {
+                imageSrc = canvas.toDataURL('image/png');
+            }
+
+            if (!imageSrc) {
+                alert('條碼生成中，請稍後再試！');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = imageSrc;
+            link.download = 'mybanddown_qrcode.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('DOMContentLoaded', generateQRCode);
+    </script>
+</body>
+</html>

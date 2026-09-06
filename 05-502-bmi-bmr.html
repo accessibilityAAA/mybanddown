@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI / BMR / TDEE 每日熱量代謝與健康體態計算器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【BMI / BMR / TDEE 每日熱量代謝與健康體態計算器】工具，即時計算身體質量指數、基礎代謝率與 TDEE 每日熱量消耗，提供減脂與增肌卡路里建議。100% 免費本機純前端運算。">
+    <meta name="keywords" content="BMI計算器,BMR計算,TDEE計算,每日熱量消耗,基礎代謝率,減脂卡路里,健康工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-502-bmi-bmr.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .health-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .health-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .health-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .health-result-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-left: 0.5rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: var(--desc-text, #64748b);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #ea580c;
+        }
+
+        .btn-calc {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-calc:hover, .btn-calc:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 28rem) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / BMI / BMR / TDEE 每日熱量代謝與健康體態計算器</li>
+            </ol>
+        </nav>
+
+        <div class="health-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🏋️ BMI / BMR / TDEE 每日熱量代謝與健康體態計算器
+            </h1>
+
+            <div class="health-layout">
+                <!-- 左側：輸入表單 -->
+                <div class="health-panel">
+                    <div class="grid-2col">
+                        <div>
+                            <label for="gender" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">生理性別：</label>
+                            <select id="gender" class="form-control" title="請選擇生理性別" onchange="calculateHealth()">
+                                <option value="male" selected>👨 男性</option>
+                                <option value="female">👩 女性</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="age" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">年齡 (歲)：</label>
+                            <input type="number" id="age" value="28" min="1" max="120" class="form-control" title="請輸入年齡" oninput="calculateHealth()">
+                        </div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="height" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">身高 (cm)：</label>
+                            <input type="number" id="height" value="172" min="50" max="250" class="form-control" title="請輸入身高" oninput="calculateHealth()">
+                        </div>
+                        <div>
+                            <label for="weight" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">體重 (kg)：</label>
+                            <input type="number" id="weight" value="68" min="20" max="300" class="form-control" title="請輸入體重" oninput="calculateHealth()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activity" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.375rem;">日常活動量強度：</label>
+                        <select id="activity" class="form-control" title="請選擇日常活動量強度" onchange="calculateHealth()">
+                            <option value="1.2">久坐 / 幾乎不運動 (辦公室文書類)</option>
+                            <option value="1.375" selected>輕度運動 (每週運動 1~3 天)</option>
+                            <option value="1.55">中度運動 (每週運動 3~5 天)</option>
+                            <option value="1.725">高度運動 (每週運動 6~7 天)</option>
+                            <option value="1.9">極高強度 (專業運動員 / 重體力勞動)</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-calc" title="點擊計算身體數據" onclick="calculateHealth()">
+                        ⚡ 實時計算體態與熱量
+                    </button>
+                </div>
+
+                <!-- 右側：結果展示 (具備無障礙宣言) -->
+                <div class="health-result-box" id="resultBox" role="status" aria-live="polite">
+                    <div class="metric-card">
+                        <div class="metric-title">BMI 身體質量指數</div>
+                        <div>
+                            <span class="metric-value" id="bmiVal">23.0</span>
+                            <span class="stat-badge" id="bmiBadge" style="background:#22c55e;">適中正常</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">BMR 基礎代謝率 (維持生命最低卡路里)</div>
+                        <div class="metric-value" id="bmrVal">1,625 <span style="font-size:1rem; font-weight:normal;">kcal/天</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">TDEE 每日總消耗熱量 (維持目前體重)</div>
+                        <div class="metric-value" id="tdeeVal" style="color:#ea580c;">2,234 <span style="font-size:1rem; font-weight:normal;">kcal/天</span></div>
+                    </div>
+
+                    <div style="background:var(--card-bg); border:0.0625rem solid var(--border-light); border-radius:0.5rem; padding:0.875rem; font-size:0.875rem; line-height:1.6;">
+                        <strong>🎯 飲食熱量與巨量營養素建議：</strong><br>
+                        • 🥑 溫和減脂 (TDEE - 15%)：<strong id="cutVal" style="color:#22c55e;">1,899</strong> kcal/天<br>
+                        <span style="font-size:0.8rem; color:var(--desc-text); padding-left:1rem; display:block;">(蛋白: <span id="cutProtein">136</span>g | 碳水: <span id="cutCarb">190</span>g | 脂肪: <span id="cutFat">63</span>g)</span>
+                        
+                        • 💪 穩健增肌 (TDEE + 10%)：<strong id="bulkVal" style="color:#3b82f6;">2,457</strong> kcal/天<br>
+                        <span style="font-size:0.8rem; color:var(--desc-text); padding-left:1rem; display:block;">(蛋白: <span id="bulkProtein">136</span>g | 碳水: <span id="bulkCarb">307</span>g | 脂肪: <span id="bulkFat">82</span>g)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與計算公式
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具採用衛福部建議之 BMI 對照標準，基礎代謝率（BMR）使用公認精準之 <strong>Mifflin-St Jeor 公式</strong> 計算，並結合活動係數得出每日總熱量消耗（TDEE）。數值僅供飲食與健身安排參考，所有計算皆於本機運算不上傳。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function calculateHealth() {
+            const gender = document.getElementById('gender').value;
+            const age = parseFloat(document.getElementById('age').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            const activity = parseFloat(document.getElementById('activity').value) || 1.2;
+
+            if (height <= 0 || weight <= 0 || age <= 0) return;
+
+            // 1. 計算 BMI
+            const heightM = height / 100;
+            const bmi = weight / (heightM * heightM);
+            const bmiFormatted = bmi.toFixed(1);
+
+            let bmiText = "正常範圍";
+            let bmiColor = "#22c55e"; // 綠色
+
+            if (bmi < 18.5) {
+                bmiText = "體重過輕";
+                bmiColor = "#3b82f6"; // 藍色
+            } else if (bmi >= 18.5 && bmi < 24) {
+                bmiText = "適中正常";
+                bmiColor = "#22c55e"; // 綠色
+            } else if (bmi >= 24 && bmi < 27) {
+                bmiText = "體重過重";
+                bmiColor = "#eab308"; // 黃色
+            } else if (bmi >= 27 && bmi < 30) {
+                bmiText = "輕度肥胖";
+                bmiColor = "#f97316"; // 橘色
+            } else if (bmi >= 30 && bmi < 35) {
+                bmiText = "中度肥胖";
+                bmiColor = "#ef4444"; // 紅色
+            } else {
+                bmiText = "重度肥胖";
+                bmiColor = "#991b1b"; // 深紅
+            }
+
+            document.getElementById('bmiVal').innerText = bmiFormatted;
+            const badge = document.getElementById('bmiBadge');
+            badge.innerText = bmiText;
+            badge.style.backgroundColor = bmiColor;
+
+            // 2. 計算 BMR (Mifflin-St Jeor Formula)
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            if (gender === 'male') {
+                bmr += 5;
+            } else {
+                bmr -= 161;
+            }
+            const bmrFormatted = Math.round(bmr);
+            document.getElementById('bmrVal').innerHTML = `${bmrFormatted.toLocaleString()} <span style="font-size:1rem; font-weight:normal;">kcal/天</span>`;
+
+            // 3. 計算 TDEE
+            const tdee = bmr * activity;
+            const tdeeFormatted = Math.round(tdee);
+            document.getElementById('tdeeVal').innerHTML = `${tdeeFormatted.toLocaleString()} <span style="font-size:1rem; font-weight:normal;">kcal/天</span>`;
+
+            // 4. 熱量目標與巨量營養素
+            const cutCalories = Math.round(tdee * 0.85);
+            const bulkCalories = Math.round(tdee * 1.10);
+
+            document.getElementById('cutVal').innerText = cutCalories.toLocaleString();
+            document.getElementById('bulkVal').innerText = bulkCalories.toLocaleString();
+
+            // 減脂營養素估算 (蛋白質: 2.0g/kg, 脂肪: 30%卡路里, 剩餘為碳水)
+            const proteinGrams = Math.round(weight * 2.0);
+            const cutFatGrams = Math.round((cutCalories * 0.30) / 9);
+            const cutCarbGrams = Math.max(0, Math.round((cutCalories - (proteinGrams * 4) - (cutFatGrams * 9)) / 4));
+
+            document.getElementById('cutProtein').innerText = proteinGrams;
+            document.getElementById('cutFat').innerText = cutFatGrams;
+            document.getElementById('cutCarb').innerText = cutCarbGrams;
+
+            // 增肌營養素估算 (蛋白質: 2.0g/kg, 脂肪: 30%卡路里, 剩餘為碳水)
+            const bulkFatGrams = Math.round((bulkCalories * 0.30) / 9);
+            const bulkCarbGrams = Math.max(0, Math.round((bulkCalories - (proteinGrams * 4) - (bulkFatGrams * 9)) / 4));
+
+            document.getElementById('bulkProtein').innerText = proteinGrams;
+            document.getElementById('bulkFat').innerText = bulkFatGrams;
+            document.getElementById('bulkCarb').innerText = bulkCarbGrams;
+        }
+
+        document.addEventListener('DOMContentLoaded', calculateHealth);
+    </script>
+</body>
+</html>

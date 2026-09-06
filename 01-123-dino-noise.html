@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課堂秩序分貝監控與四季吉祥物計時器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【課堂秩序分貝監控與四季吉祥物計時器】工具，支援貓咪、柴犬、棕熊、櫻花、萬聖南瓜、聖誕小樹、學校與畢業風格。實時麥克風分貝偵測，聲音超標吉祥物即刻驚嚇並重置時間。100% 免費本機純前端運算。">
+    <meta name="keywords" content="課堂秩序,分貝計時器,班級管理,聲音監控,貓咪計時器,萬聖南瓜,聖誕小樹,學校工具,老師工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-123-dino-noise.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .stage-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        /* 🌟 置頂主題選擇列 */
+        .top-theme-bar {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 0.0625rem solid var(--border-light, #e2e8f0);
+        }
+
+        .theme-btn {
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            color: var(--body-text);
+            padding: 0.4rem 0.875rem;
+            border-radius: 1.25rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .theme-btn.active {
+            background: #ea580c;
+            color: #ffffff !important;
+            border-color: #ea580c;
+            box-shadow: 0 0.125rem 0.375rem rgba(234, 88, 12, 0.3);
+        }
+
+        /* 滿版核心舞台 */
+        .hero-stage {
+            background: var(--panel-bg, #f8fafc);
+            border: 0.125rem dashed var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .mascot-avatar {
+            font-size: clamp(4.5rem, 10vw, 7rem);
+            transition: transform 0.2s ease;
+            display: inline-block;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .mascot-avatar.scared {
+            animation: mascotShake 0.3s infinite;
+        }
+
+        @keyframes mascotShake {
+            0% { transform: translate(2px, 2px) rotate(0deg); }
+            20% { transform: translate(-4px, 0px) rotate(-4deg); }
+            40% { transform: translate(4px, 3px) rotate(4deg); }
+            60% { transform: translate(-3px, 1px) rotate(-2deg); }
+            80% { transform: translate(3px, -2px) rotate(3deg); }
+            100% { transform: translate(1px, 2px) rotate(0deg); }
+        }
+
+        .hero-timer-display {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #ea580c;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            margin: 0.25rem 0;
+            letter-spacing: 0.1rem;
+            line-height: 1.1;
+        }
+
+        .meter-bar-outer {
+            width: 100%;
+            height: 1.25rem;
+            background: #e2e8f0;
+            border-radius: 0.625rem;
+            overflow: hidden;
+            margin: 0.75rem 0 1.25rem 0;
+            border: 0.0625rem solid var(--border-light);
+            box-sizing: border-box;
+        }
+
+        .meter-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: #22c55e;
+            transition: width 0.1s ease, background-color 0.2s ease;
+        }
+
+        /* 核心操作按鈕 */
+        .primary-action-group {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .btn-start {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.15rem;
+            transition: background 0.2s;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-start:hover { background: #c2410c; }
+        .btn-start:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        .btn-stop {
+            background: #64748b;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.15rem;
+            transition: background 0.2s;
+        }
+        .btn-stop:hover { background: #475569; }
+        .btn-stop:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* 🌟 防破版彈性設定面板 */
+        .controls-wrapper {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            box-sizing: border-box;
+        }
+
+        .control-item {
+            flex: 1 1 15rem;
+            min-width: 0; /* 防止子元素撐破卡片 */
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 0.5rem 0 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 48rem) {
+            .btn-start, .btn-stop {
+                width: 100%;
+                padding: 0.75rem 1rem;
+            }
+            .hero-stage {
+                padding: 1.25rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 課堂秩序分貝監控與四季吉祥物計時器</li>
+            </ol>
+        </nav>
+
+        <div class="stage-card">
+
+            <!-- 🎨 1. 置頂主題選擇列 -->
+            <div class="top-theme-bar" role="tablist" aria-label="選擇課堂吉祥物風格">
+                <button type="button" class="theme-btn active" role="tab" aria-selected="true" title="切換為暖心貓咪風格" onclick="changeTheme('cat', this)">🐱 暖心貓咪</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為忠誠柴犬風格" onclick="changeTheme('dog', this)">🐶 忠誠柴犬</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為棕熊寶貝風格" onclick="changeTheme('bear', this)">🐻 棕熊寶貝</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為春日櫻花風格" onclick="changeTheme('sakura', this)">🌸 春日櫻花</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為萬聖南瓜風格" onclick="changeTheme('pumpkin', this)">🎃 萬聖南瓜</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為聖誕小樹風格" onclick="changeTheme('tree', this)">🎄 聖誕小樹</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為學校上課風格" onclick="changeTheme('school', this)">🏫 學校上課</button>
+                <button type="button" class="theme-btn" role="tab" aria-selected="false" title="切換為畢業博士風格" onclick="changeTheme('grad', this)">🎓 畢業博士</button>
+            </div>
+
+            <!-- 🐱 2. 滿版大螢幕舞台 -->
+            <div class="hero-stage">
+                <div class="mascot-avatar" id="mascotIcon" aria-hidden="true">🐱</div>
+                
+                <div id="statusText" role="status" aria-live="polite" style="font-weight:bold; font-size:1.15rem; color:var(--body-text); margin-top:0.5rem;">
+                    準備就緒，按下下方「啟動吉祥物監控」開始課堂專注！
+                </div>
+
+                <div class="hero-timer-display" id="timeDisplay">00:00</div>
+
+                <!-- 即時分貝條 -->
+                <div style="font-size:0.9rem; color:var(--desc-text); display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>即時音量：<strong id="dbValue" style="color:#ea580c;">0</strong> dB</span>
+                    <span>警戒門檻：<strong id="thresholdValue">45</strong> dB</span>
+                </div>
+                
+                <!-- 🌟 無障礙動態進度條宣言 -->
+                <div class="meter-bar-outer" id="meterBarOuter" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="90" aria-label="即時聲音分貝計">
+                    <div class="meter-bar-inner" id="meterBar"></div>
+                </div>
+
+                <!-- 核心操作按鈕 -->
+                <div class="primary-action-group">
+                    <button type="button" class="btn-start" id="startBtn" title="授權存取麥克風並啟動分貝監控" onclick="startMonitoring()">
+                        🎙️ 啟動吉祥物監控
+                    </button>
+                    <button type="button" class="btn-stop" id="stopBtn" title="停止分貝監控並重新計時" onclick="stopMonitoring()" disabled>
+                        ⏹️ 停止監控
+                    </button>
+                </div>
+            </div>
+
+            <!-- ⚙️ 3. 集中門檻與自由時間拉桿 -->
+            <div class="controls-wrapper">
+                <div class="control-item">
+                    <label for="sensitivityRange" style="font-weight:bold; display:block; font-size:0.9rem; margin-bottom:0.25rem;">🎛️ 噪音警戒門檻 (dB)：</label>
+                    <input type="range" id="sensitivityRange" min="20" max="90" value="45" title="請滑動調整允許的最大噪音分貝上限" oninput="updateThreshold(this.value)" class="form-control" style="width:100%;">
+                    <span style="font-size:0.75rem; color:var(--desc-text);">(安靜環境調低，風扇冷氣聲大可調高)</span>
+                </div>
+
+                <div class="control-item">
+                    <label for="timeSlider" style="font-weight:bold; display:block; font-size:0.9rem; margin-bottom:0.25rem;">
+                        🎯 目標專注時間：<strong id="sliderTimeDisplay" style="color:#ea580c;">5</strong> 分鐘
+                    </label>
+                    <input type="range" id="timeSlider" min="1" max="60" value="5" title="滑動自由調整專注時間（1至60分鐘）" oninput="updateTimeSlider(this.value)" class="form-control" style="width:100%;">
+                    <span style="font-size:0.75rem; color:var(--desc-text);">(可自由拉動 1 ~ 60 分鐘)</span>
+                </div>
+            </div>
+
+            <!-- 📄 4. 補充說明 -->
+            <div class="info-desc-box">
+                <h1 style="color:var(--title-blue); font-size:1.1rem; margin-bottom:0.375rem;">
+                    課堂秩序分貝監控與四季吉祥物計時器
+                </h1>
+                <p style="color:var(--desc-text); max-width:40ch; font-size:0.875rem; line-height:1.6;">
+                    專為全台老師與班級管理打造的滿版聲音分貝監控神器！支援四季與節慶可愛吉祥物切換。全班保持安靜時吉祥物會開心累積專注時間；一旦有人講話太吵超過設定分貝，吉祥物就會嚇壞並將累積時間歸零重來！100% 本機純前端運算，絕不上傳音訊，安全保障學生隱私。
+                </p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let isMonitoring = false;
+
+        let dbThreshold = 45;
+        let secondsAccumulated = 0;
+        let timerInterval = null;
+        let targetTotalSeconds = 300;
+
+        let currentTheme = 'cat';
+        const themeConfig = {
+            cat: { normal: '🐱', scared: '🙀💥', win: '🎉😻👑', name: '暖心貓咪' },
+            dog: { normal: '🐶', scared: '🙀💥', win: '🎉🐶👑', name: '忠誠柴犬' },
+            bear: { normal: '🐻', scared: '🐻‍❄️💥', win: '🎉🐻👑', name: '棕熊寶貝' },
+            sakura: { normal: '🌸', scared: '🥀💥', win: '🎉🌸👑', name: '春日櫻花' },
+            pumpkin: { normal: '🎃', scared: '👻💥', win: '🎉🍬👑', name: '萬聖南瓜' },
+            tree: { normal: '🎄', scared: '❄️💥', win: '🎉🎁👑', name: '聖誕小樹' },
+            school: { normal: '🏫', scared: '🔔💥', win: '🎉📚👑', name: '學校上課' },
+            grad: { normal: '🎓', scared: '📜💥', win: '🎉🎓👑', name: '畢業博士' }
+        };
+
+        let soundCtx = null;
+        function getSoundContext() {
+            if (!soundCtx) {
+                soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (soundCtx.state === 'suspended') {
+                soundCtx.resume();
+            }
+            return soundCtx;
+        }
+
+        function playScaredSound() {
+            const ctxAudio = getSoundContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, ctxAudio.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(250, ctxAudio.currentTime + 0.35);
+            gain.gain.setValueAtTime(0.25, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.35);
+            osc.connect(gain); gain.connect(ctxAudio.destination);
+            osc.start(); osc.stop(ctxAudio.currentTime + 0.35);
+        }
+
+        function playVictorySound() {
+            const ctxAudio = getSoundContext();
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                const startTime = ctxAudio.currentTime + idx * 0.1;
+                gain.gain.setValueAtTime(0.2, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(startTime); osc.stop(startTime + 0.3);
+            });
+        }
+
+        function changeTheme(themeKey, btn) {
+            currentTheme = themeKey;
+            document.querySelectorAll('.theme-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            const cfg = themeConfig[themeKey];
+            if (!isMonitoring) {
+                document.getElementById('mascotIcon').innerText = cfg.normal;
+                document.getElementById('statusText').innerText = `準備就緒，按下「啟動吉祥物監控」，讓【${cfg.name}】陪伴大家！`;
+            }
+        }
+
+        function updateThreshold(val) {
+            dbThreshold = parseInt(val, 10);
+            document.getElementById('thresholdValue').innerText = dbThreshold;
+        }
+
+        function updateTimeSlider(val) {
+            const mins = parseInt(val, 10);
+            document.getElementById('sliderTimeDisplay').innerText = mins;
+            if (!isMonitoring) {
+                targetTotalSeconds = mins * 60;
+            }
+        }
+
+        async function startMonitoring() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                isMonitoring = true;
+                secondsAccumulated = 0;
+                targetTotalSeconds = parseInt(document.getElementById('timeSlider').value, 10) * 60;
+
+                const cfg = themeConfig[currentTheme];
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('timeSlider').disabled = true;
+                document.getElementById('mascotIcon').innerText = cfg.normal;
+                document.getElementById('mascotIcon').classList.remove('scared');
+                document.getElementById('statusText').innerText = `🟢 監控中：全班保持安靜，【${cfg.name}】正在開心累積專注時間！`;
+
+                startTimer();
+
+                javascriptNode.onaudioprocess = function() {
+                    if (!isMonitoring) return;
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) {
+                        values += array[i];
+                    }
+                    const average = values / array.length;
+                    const currentDb = Math.round(average);
+
+                    document.getElementById('dbValue').innerText = currentDb;
+                    document.getElementById('meterBarOuter').setAttribute('aria-valuenow', currentDb);
+                    
+                    const percent = Math.min(100, Math.round((currentDb / 90) * 100));
+                    const meter = document.getElementById('meterBar');
+                    meter.style.width = percent + '%';
+
+                    if (currentDb > dbThreshold) {
+                        meter.style.backgroundColor = '#ef4444';
+                        triggerViolation(currentDb);
+                    } else {
+                        meter.style.backgroundColor = '#22c55e';
+                    }
+                };
+
+            } catch (err) {
+                alert('無法存取麥克風！請確認瀏覽器已允許麥克風權限。');
+            }
+        }
+
+        function triggerViolation(db) {
+            playScaredSound();
+            secondsAccumulated = 0;
+            updateTimerDisplay();
+
+            const cfg = themeConfig[currentTheme];
+            const mascot = document.getElementById('mascotIcon');
+            mascot.innerText = cfg.scared;
+            mascot.classList.add('scared');
+            document.getElementById('statusText').innerText = `🚨 警告！聲音超標 (${db} dB)！【${cfg.name}】嚇壞了，專注時間歸零重來！`;
+
+            setTimeout(() => {
+                if (isMonitoring) {
+                    mascot.innerText = cfg.normal;
+                    mascot.classList.remove('scared');
+                    document.getElementById('statusText').innerText = `🟢 繼續監控中：請保持安靜重新累積時間！`;
+                }
+            }, 2000);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isMonitoring) return;
+                secondsAccumulated++;
+                updateTimerDisplay();
+
+                if (secondsAccumulated >= targetTotalSeconds) {
+                    handleVictory();
+                }
+            }, 1000);
+        }
+
+        function handleVictory() {
+            stopMonitoring();
+            playVictorySound();
+            const cfg = themeConfig[currentTheme];
+            document.getElementById('mascotIcon').innerText = cfg.win;
+            document.getElementById('statusText').innerText = `🏆 太棒了！全班成功達成安靜目標，【${cfg.name}】給全班頒發皇冠！`;
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(secondsAccumulated / 60).toString().padStart(2, '0');
+            const s = (secondsAccumulated % 60).toString().padStart(2, '0');
+            document.getElementById('timeDisplay').innerText = `${m}:${s}`;
+        }
+
+        function stopMonitoring() {
+            isMonitoring = false;
+            clearInterval(timerInterval);
+
+            if (javascriptNode) javascriptNode.onaudioprocess = null;
+            if (microphone && microphone.mediaStream) {
+                microphone.mediaStream.getTracks().forEach(track => track.stop());
+            }
+
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('timeSlider').disabled = false;
+            document.getElementById('meterBar').style.width = '0%';
+            document.getElementById('dbValue').innerText = '0';
+            document.getElementById('meterBarOuter').setAttribute('aria-valuenow', '0');
+        }
+    </script>
+</body>
+</html>

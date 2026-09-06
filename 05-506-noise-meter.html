@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上分貝計與環境噪音即時監測儀 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【分貝計與環境噪音即時監測儀】工具，利用麥克風即時測量環境音量分貝 (dB)、平均值與最高峰值，提供聲音危害等級提示。100% 免費本機純前端運算不上傳。">
+    <meta name="keywords" content="分貝計,環境噪音,測噪音,線上分貝器,噪音檢測,聲音監測,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-506-noise-meter.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .noise-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .noise-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .noise-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .noise-result-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .decibel-number {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #ea580c;
+            line-height: 1;
+            margin: 0.5rem 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        .meter-bar-outer {
+            width: 100%;
+            height: 1.25rem;
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.625rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .meter-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: #22c55e;
+            transition: width 0.1s ease, background-color 0.2s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .stat-box {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+
+        .btn-start {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-start:hover, .btn-start:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-stop {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            display: none;
+        }
+        .btn-stop:hover, .btn-stop:focus-visible { 
+            background: #dc2626; 
+            outline: 0.2rem solid #ef4444;
+        }
+
+        .btn-reset-stat {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 0.75rem;
+        }
+        .btn-reset-stat:hover, .btn-reset-stat:focus-visible {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 28rem) {
+            .decibel-number {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上分貝計與環境噪音即時監測儀</li>
+            </ol>
+        </nav>
+
+        <div class="noise-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🎙️ 線上分貝計與環境噪音即時監測儀
+            </h1>
+
+            <div class="noise-layout">
+                <!-- 左側：控制區域 -->
+                <div class="noise-panel">
+                    <p style="font-size:0.9rem; color:var(--desc-text); line-height:1.6; margin-top:0; margin-bottom:1.25rem;">
+                        點擊下方按鈕並允許瀏覽器存取麥克風權限，即可開始實時檢測您周遭環境的噪音分貝（dB）數值。
+                    </p>
+
+                    <button type="button" class="btn-start" id="startBtn" title="點擊開始進行環境噪音分貝檢測" onclick="startMeter()">
+                        🎙️ 開始麥克風噪音檢測
+                    </button>
+                    <button type="button" class="btn-stop" id="stopBtn" title="點擊停止噪音檢測" onclick="stopMeter()">
+                        ⏹️ 停止監測
+                    </button>
+
+                    <div style="margin-top:1.5rem; background:var(--panel-bg); border:0.0625rem solid var(--border-light); border-radius:0.5rem; padding:1rem; font-size:0.85rem; line-height:1.7; color:var(--desc-text);">
+                        <strong>🔊 常見環境噪音對照表：</strong><br>
+                        • 30 dB：極安靜 (郊區夜晚 / 圖書館)<br>
+                        • 60 dB：一般交談 / 辦公室環境<br>
+                        • 80 dB：繁華街頭 / 汽車行駛聲<br>
+                        • 90+ dB：工廠施工 / 聽力長期危害
+                    </div>
+                </div>
+
+                <!-- 右側：實時展台 (具備無障礙狀態) -->
+                <div class="noise-result-box" id="resultBox" role="status" aria-live="polite">
+                    <span style="font-size:0.9rem; font-weight:bold; color:var(--desc-text);">當前環境音量 (dBA)</span>
+                    
+                    <div class="decibel-number" id="dbValue">0</div>
+                    
+                    <span id="noiseStatus" style="font-size:0.95rem; font-weight:bold; color:#22c55e;">尚未開啟監測</span>
+
+                    <div class="meter-bar-outer" id="meterBarOuter" role="progressbar" aria-valuenow="30" aria-valuemin="30" aria-valuemax="110" aria-label="即時環境音量分貝進度條">
+                        <div class="meter-bar-inner" id="meterBar"></div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span style="font-size:0.8rem; color:var(--desc-text); display:block;">平均分貝 (AVG)</span>
+                            <strong id="avgDb" style="font-size:1.2rem; color:var(--body-text);">0 dB</strong>
+                        </div>
+                        <div class="stat-box">
+                            <span style="font-size:0.8rem; color:var(--desc-text); display:block;">最高峰值 (PEAK)</span>
+                            <strong id="peakDb" style="font-size:1.2rem; color:#ef4444;">0 dB</strong>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-reset-stat" title="重置最高峰值與平均統計" onclick="resetStats()">🔄 重置統計數據</button>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與技術聲明
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具採用網頁 Web Audio API 的 Fast Fourier Transform (FFT) 分析聲音振幅，並根據麥克風訊號計算相對分貝值。受限於各硬體麥克風感光度與增益差異，數據適合做為環境音量變化之相對參考，非法定檢驗標準。聲音串流 100% 於本機分析處理，絕不錄音或上傳伺服器！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let audioCtx = null;
+        let analyser = null;
+        let microphone = null;
+        let mediaStream = null;
+        let animId = null;
+
+        let totalSamples = 0;
+        let sumDb = 0;
+        let maxDb = 0;
+
+        async function startMeter() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                microphone = audioCtx.createMediaStreamSource(mediaStream);
+
+                analyser.fftSize = 512;
+                microphone.connect(analyser);
+
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+
+                resetStats();
+                updateMeter();
+
+            } catch (err) {
+                alert('無法取得麥克風權限：' + err.message);
+            }
+        }
+
+        function resetStats() {
+            totalSamples = 0;
+            sumDb = 0;
+            maxDb = 0;
+            document.getElementById('avgDb').innerText = '0 dB';
+            document.getElementById('peakDb').innerText = '0 dB';
+        }
+
+        function updateMeter() {
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            let average = sum / dataArray.length;
+
+            // 換算為相對分貝 (30~110 dB 範圍)
+            let db = Math.round(30 + (average / 255) * 80);
+
+            // 更新統計
+            totalSamples++;
+            sumDb += db;
+            if (db > maxDb) maxDb = db;
+
+            const avgDb = Math.round(sumDb / totalSamples);
+
+            // UI 渲染
+            document.getElementById('dbValue').innerText = db;
+            document.getElementById('avgDb').innerText = `${avgDb} dB`;
+            document.getElementById('peakDb').innerText = `${maxDb} dB`;
+
+            // 進度條與狀態文字
+            const percent = Math.min(100, Math.max(0, ((db - 30) / 80) * 100));
+            const bar = document.getElementById('meterBar');
+            const barOuter = document.getElementById('meterBarOuter');
+            const status = document.getElementById('noiseStatus');
+
+            bar.style.width = percent + '%';
+            barOuter.setAttribute('aria-valuenow', db);
+
+            if (db < 50) {
+                bar.style.backgroundColor = '#22c55e';
+                status.innerText = '🟢 環境安靜舒適';
+                status.style.color = '#22c55e';
+            } else if (db < 75) {
+                bar.style.backgroundColor = '#eab308';
+                status.innerText = '🟡 一般生活音量';
+                status.style.color = '#eab308';
+            } else {
+                bar.style.backgroundColor = '#ef4444';
+                status.innerText = '🔴 噪音過大 (注意聽力保護)';
+                status.style.color = '#ef4444';
+            }
+
+            animId = requestAnimationFrame(updateMeter);
+        }
+
+        function stopMeter() {
+            if (animId) cancelAnimationFrame(animId);
+            
+            // 關閉 Web Audio 上下文
+            if (audioCtx) {
+                audioCtx.close();
+                audioCtx = null;
+            }
+
+            // 徹底關閉麥克風硬體 Track，釋放設備
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('noiseStatus').innerText = '已停止監測';
+            document.getElementById('noiseStatus').style.color = 'var(--desc-text)';
+            document.getElementById('meterBar').style.width = '0%';
+            document.getElementById('meterBarOuter').setAttribute('aria-valuenow', '30');
+        }
+    </script>
+</body>
+</html>

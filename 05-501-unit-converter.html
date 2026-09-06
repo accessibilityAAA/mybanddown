@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能工程與日常單位換算器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【多功能工程與日常單位換算器】工具，支援長度、重量、坪數面積、溫度、體積與資料容量極速實時雙向換算。100% 免費本機純前端運算。">
+    <meta name="keywords" content="單位換算,長度換算,坪數換算,重量換算,溫度換算,GB轉MB,生活工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-501-unit-converter.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .converter-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .tab-btn {
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            color: var(--body-text);
+            padding: 0.5rem 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ea580c;
+            color: #ffffff !important;
+            border-color: #ea580c;
+            box-shadow: 0 0.125rem 0.375rem rgba(234, 88, 12, 0.3);
+        }
+
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .unit-box {
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.875rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+            position: relative;
+        }
+
+        .unit-box label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--desc-text, #64748b);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.375rem;
+            align-items: center;
+        }
+
+        .unit-box input {
+            width: 100%;
+            background: var(--input-bg, #ffffff);
+            color: var(--body-text);
+            border: 0.0625rem solid var(--border-light);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: bold;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .unit-box input:focus-visible {
+            border-color: #ea580c;
+            outline: 0.125rem solid #ea580c;
+        }
+
+        .btn-copy-unit {
+            background: var(--card-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.5rem 0.625rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        .btn-copy-unit:hover, .btn-copy-unit:focus-visible {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-clear {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: #ef4444;
+            padding: 0.375rem 0.875rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-clear:hover, .btn-clear:focus-visible {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .unit-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 多功能工程與日常單位換算器</li>
+            </ol>
+        </nav>
+
+        <div class="converter-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                📏 多功能工程與日常單位換算器
+            </h1>
+
+            <div class="action-bar">
+                <button type="button" class="btn-clear" title="清空所有輸入數字" onclick="clearAllInputs()">🧹 清空數字</button>
+            </div>
+
+            <!-- 類別頁籤 (具備無障礙頁籤語意) -->
+            <div class="tab-group" role="tablist" aria-label="單位類別切換">
+                <button type="button" class="tab-btn active" role="tab" aria-selected="true" title="切換至長度單位換算" onclick="switchCategory('length', this)">📏 長度</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至重量與質量單位換算" onclick="switchCategory('weight', this)">⚖️ 重量</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至房屋與土地坪數面積換算" onclick="switchCategory('area', this)">🗺️ 面積/坪數</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至溫度單位換算" onclick="switchCategory('temp', this)">🌡️ 溫度</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至體積與容量換算" onclick="switchCategory('volume', this)">🧪 體積/容量</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" title="切換至電腦資料容量換算" onclick="switchCategory('data', this)">💾 資料容量</button>
+            </div>
+
+            <!-- 動態單位輸入區 -->
+            <div id="unitGrid" class="unit-grid" role="status" aria-live="polite">
+                <!-- 動態注入輸入框 -->
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與即時計算特色
+                </h2>
+                <p style="max-width:40ch;">
+                    本換算器提供即時雙向連動，您只需在任意單位的文字框內輸入數字，系統將自動計算並呈現所有相關單位的換算結果。支援台灣常見的台斤、兩、坪與甲，所有計算均在本地瀏覽器秒速完成！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製數值！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let currentCategory = 'length';
+
+        const unitDefinitions = {
+            length: [
+                { id: 'm', label: '公尺 (m)', toBase: val => val, fromBase: base => base },
+                { id: 'cm', label: '公分 (cm)', toBase: val => val / 100, fromBase: base => base * 100 },
+                { id: 'mm', label: '公厘 (mm)', toBase: val => val / 1000, fromBase: base => base * 1000 },
+                { id: 'km', label: '公里 (km)', toBase: val => val * 1000, fromBase: base => base / 1000 },
+                { id: 'inch', label: '英吋 (in)', toBase: val => val * 0.0254, fromBase: base => base / 0.0254 },
+                { id: 'foot', label: '英呎 (ft)', toBase: val => val * 0.3048, fromBase: base => base / 0.3048 },
+                { id: 'yard', label: '碼 (yd)', toBase: val => val * 0.9144, fromBase: base => base / 0.9144 },
+                { id: 'mile', label: '英哩 (mi)', toBase: val => val * 1609.344, fromBase: base => base / 1609.344 },
+                { id: 'taichih', label: '台尺', toBase: val => val * (10 / 33), fromBase: base => base / (10 / 33) }
+            ],
+            weight: [
+                { id: 'kg', label: '公斤 (kg)', toBase: val => val, fromBase: base => base },
+                { id: 'g', label: '公克 (g)', toBase: val => val / 1000, fromBase: base => base * 1000 },
+                { id: 't', label: '公噸 (t)', toBase: val => val * 1000, fromBase: base => base / 1000 },
+                { id: 'lb', label: '磅 (lb)', toBase: val => val * 0.45359237, fromBase: base => base / 0.45359237 },
+                { id: 'oz', label: '盎司 (oz)', toBase: val => val * 0.028349523125, fromBase: base => base / 0.028349523125 },
+                { id: 'taijin', label: '台斤', toBase: val => val * 0.6, fromBase: base => base / 0.6 },
+                { id: 'liang', label: '兩', toBase: val => val * 0.0375, fromBase: base => base / 0.0375 }
+            ],
+            area: [
+                { id: 'ping', label: '坪', toBase: val => val * 3.305785, fromBase: base => base / 3.305785 },
+                { id: 'sqm', label: '平方公尺 (m²)', toBase: val => val, fromBase: base => base },
+                { id: 'ha', label: '公頃 (ha)', toBase: val => val * 10000, fromBase: base => base / 10000 },
+                { id: 'sqkm', label: '平方公里 (km²)', toBase: val => val * 1000000, fromBase: base => base / 1000000 },
+                { id: 'jia', label: '甲', toBase: val => val * 9699.17, fromBase: base => base / 9699.17 },
+                { id: 'acre', label: '英畝 (acre)', toBase: val => val * 4046.85642, fromBase: base => base / 4046.85642 }
+            ],
+            temp: [
+                { id: 'c', label: '攝氏 (°C)', toBase: val => val, fromBase: base => base },
+                { id: 'f', label: '華氏 (°F)', toBase: val => (val - 32) * (5 / 9), fromBase: base => base * (9 / 5) + 32 },
+                { id: 'k', label: '克爾文 (K)', toBase: val => val - 273.15, fromBase: base => base + 273.15 }
+            ],
+            volume: [
+                { id: 'l', label: '公升 (L)', toBase: val => val, fromBase: base => base },
+                { id: 'ml', label: '毫升 (mL)', toBase: val => val / 1000, fromBase: base => base * 1000 },
+                { id: 'cbm', label: '立方公尺 (m³)', toBase: val => val * 1000, fromBase: base => base / 1000 },
+                { id: 'floz', label: '美制液量盎司 (fl oz)', toBase: val => val * 0.0295735, fromBase: base => base / 0.0295735 },
+                { id: 'gal', label: '美制加侖 (gal)', toBase: val => val * 3.78541, fromBase: base => base / 3.78541 }
+            ],
+            data: [
+                { id: 'mb', label: 'Megabytes (MB)', toBase: val => val, fromBase: base => base },
+                { id: 'b', label: 'Bytes (B)', toBase: val => val / (1024 * 1024), fromBase: base => base * (1024 * 1024) },
+                { id: 'kb', label: 'Kilobytes (KB)', toBase: val => val / 1024, fromBase: base => base * 1024 },
+                { id: 'gb', label: 'Gigabytes (GB)', toBase: val => val * 1024, fromBase: base => base / 1024 },
+                { id: 'tb', label: 'Terabytes (TB)', toBase: val => val * (1024 * 1024), fromBase: base => base / (1024 * 1024) },
+                { id: 'pb', label: 'Petabytes (PB)', toBase: val => val * (1024 * 1024 * 1024), fromBase: base => base / (1024 * 1024 * 1024) }
+            ]
+        };
+
+        function switchCategory(catKey, btn) {
+            currentCategory = catKey;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('unitGrid');
+            const units = unitDefinitions[currentCategory];
+
+            let html = '';
+            units.forEach((u, idx) => {
+                const defaultVal = idx === 0 ? 1 : '';
+                html += `
+                    <div class="unit-box">
+                        <label for="input_${u.id}">${u.label}</label>
+                        <div class="input-row">
+                            <input type="number" id="input_${u.id}" value="${defaultVal}" step="any" placeholder="0" title="輸入數字進行雙向連動換算" oninput="onValueChange('${u.id}', this.value)">
+                            <button type="button" class="btn-copy-unit" title="複製 ${u.label} 數值" onclick="copyUnitValue('input_${u.id}')">📋 複製</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            if (units.length > 0) {
+                onValueChange(units[0].id, '1');
+            }
+        }
+
+        function onValueChange(sourceId, valueStr) {
+            if (valueStr === '') {
+                clearAllInputs();
+                return;
+            }
+
+            const val = parseFloat(valueStr);
+            if (isNaN(val)) return;
+
+            const units = unitDefinitions[currentCategory];
+            const sourceUnit = units.find(u => u.id === sourceId);
+            if (!sourceUnit) return;
+
+            const baseVal = sourceUnit.toBase(val);
+
+            units.forEach(u => {
+                if (u.id !== sourceId) {
+                    const input = document.getElementById(`input_${u.id}`);
+                    if (input) {
+                        const converted = u.fromBase(baseVal);
+                        input.value = formatNumber(converted);
+                    }
+                }
+            });
+        }
+
+        function formatNumber(num) {
+            if (num === 0) return '0';
+            const abs = Math.abs(num);
+            if (abs < 0.000001 || abs >= 1000000000) {
+                return num.toExponential(4);
+            }
+            return Number.isInteger(num) ? num.toString() : parseFloat(num.toFixed(6)).toString();
+        }
+
+        function clearAllInputs() {
+            const units = unitDefinitions[currentCategory];
+            units.forEach(u => {
+                const input = document.getElementById(`input_${u.id}`);
+                if (input) input.value = '';
+            });
+        }
+
+        function copyUnitValue(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                const toast = document.getElementById('toastNotify');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGrid();
+        });
+    </script>
+</body>
+</html>

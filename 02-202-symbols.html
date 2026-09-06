@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特殊符號與顏文字一鍵複製大全 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【特殊符號與顏文字一鍵複製大全】工具，收錄箭頭、表情顏文字、數學單位、星號、清單符號與裝飾線。點擊即可複製。100% 免費本機純前端運算。">
+    <meta name="keywords" content="特殊符號,顏文字,Emoji,符號複製,小編工具,標點符號,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-202-symbols.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .symbol-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .search-bar-wrapper {
+            margin-bottom: 1.25rem;
+        }
+
+        .category-tab-group {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .cat-btn {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.5rem 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .cat-btn.active {
+            background: #ea580c;
+            color: #ffffff !important;
+            border-color: #ea580c;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
+            gap: 0.625rem;
+        }
+
+        .symbol-btn {
+            min-height: 3.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            color: var(--body-text);
+        }
+
+        .symbol-btn:hover, .symbol-btn:focus-visible {
+            border-color: #ea580c;
+            background: var(--card-bg, #ffffff);
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.15);
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .kaomoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+            gap: 0.625rem;
+        }
+
+        .kaomoji-btn {
+            padding: 0.75rem 0.5rem;
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--body-text);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .kaomoji-btn:hover, .kaomoji-btn:focus-visible {
+            border-color: #ea580c;
+            color: #ea580c;
+            background: var(--card-bg, #ffffff);
+            outline: 0.2rem solid #ea580c;
+        }
+
+        /* 複製成功的 Toast 提示 */
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 28rem) {
+            .symbol-grid {
+                grid-template-columns: repeat(auto-fill, minmax(2.8rem, 1fr));
+            }
+            .symbol-btn {
+                min-height: 2.8rem;
+                font-size: 1.25rem;
+            }
+            .kaomoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 特殊符號與顏文字一鍵複製大全</li>
+            </ol>
+        </nav>
+
+        <div class="symbol-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                ♟️ 特殊符號與顏文字一鍵複製大全
+            </h1>
+
+            <!-- 關鍵字搜尋區域 -->
+            <div class="search-bar-wrapper">
+                <input type="search" id="symbolSearch" placeholder="搜尋符號 (例如: 箭頭, 勾, 驚嘆號, 顏文字, 數學)..." aria-label="過濾搜尋特殊符號" title="請輸入關鍵字快速搜尋符號" oninput="filterSymbols(this.value)" class="form-control">
+            </div>
+
+            <!-- 分類選單頁籤 (具備完整 WCAG 頁籤語意) -->
+            <div class="category-tab-group" role="tablist" aria-label="特殊符號分類清單">
+                <button type="button" class="cat-btn active" role="tab" aria-selected="true" title="顯示常用熱門符號" onclick="switchCategory('popular', this)">🔥 常用熱門</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示箭頭與方向符號" onclick="switchCategory('arrows', this)">➔ 箭頭方向</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示可愛顏文字表情" onclick="switchCategory('kaomoji', this)"> (•‿•) 顏文字</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示愛心與星號符號" onclick="switchCategory('stars', this)">★ 星號愛心</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示勾選與標記符號" onclick="switchCategory('check', this)">✔ 勾選標記</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示數學與單位符號" onclick="switchCategory('math', this)">± 數學單位</button>
+                <button type="button" class="cat-btn" role="tab" aria-selected="false" title="顯示幾何與框線符號" onclick="switchCategory('geometry', this)">■ 幾何圖形</button>
+            </div>
+
+            <!-- 符號展台 -->
+            <div id="symbolDisplayArea" role="status" aria-live="polite">
+                <!-- 動態注入符號按鈕 -->
+            </div>
+
+            <!-- 補充說明 -->
+            <div style="background:var(--panel-bg); border-top:0.125rem solid var(--border-light); padding:1.25rem 0.5rem 0 0.5rem; margin-top:1.5rem;">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem;">
+                    使用說明
+                </h2>
+                <p style="color:var(--desc-text); font-size:0.875rem; line-height:1.6; max-width:40ch;">
+                    點擊畫面上任意符號或顏文字，系統即可將內容自動複製至剪貼簿，方便貼至 FB、IG、LINE 或 Word 論文文章中。完全免安裝套件、本機極速響應！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 複製成功提示聲明 (具備螢幕報讀功能) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製：<span id="toastContent" style="color:#fb923c;"></span></div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        const symbolData = {
+            popular: ["✔", "✖", "★", "☆", "♥", "♡", "➔", "⚡", "✨", "🔥", "🍱", "💡", "📌", "🎉", "👑", "⭕", "❌", "❓", "❗", "▲", "▼", "◆", "◇", "▶", "◀", "✿", "❀", "☸", "☯", "♠", "♣", "♦"],
+            arrows: ["➔", "➜", "➝", "➞", "➟", "➠", "➡", "➢", "➣", "➤", "➥", "➦", "➧", "➨", "➩", "➪", "➫", "➬", "➭", "➮", "➯", "➱", "➲", "➳", "➴", "➵", "➶", "➷", "➸", "🏹", "⬆", "⬇", "⬅", "➔", "↖", "↗", "↘", "↙", "↔", "↕", "⇄", "⇅", "⇆", "⇇", "⇈", "⇉", "⇊"],
+            kaomoji: ["(•‿•)", "(≧▽≦)", "(´▽`ʃ♡ƪ)", " (•̀ᴗ••́)و", "(°ロ°)", "(¬_¬)", "( ;´-`;)", "(•ω•)", "(─‿─)", "(▰˘◡˘▰)", "(◕‿◕)", "(⊙_⊙)", "(´･ω･`)", "(•‿•)/", "(✿◠‿◠)", "(っ˘з(˘⌣˘ )", "p(╬`皿´)q", " (•̯́^•̯̀)"],
+            stars: ["★", "☆", "✦", "✧", "✩", "✪", "✫", "✬", "✭", "✮", "✯", "✰", "⁂", "⁎", "⁑", "🟊", "☸", "✡", "🔯", "♥", "♡", "❥", "❣", "❦", "❧", "💖", "💗", "💓", "💞", "💕"],
+            check: ["✔", "✓", "☑", "✅", "✕", "✖", "❌", "❎", "➾", "➕", "➖", "➗", "🌢", "🚫", "🛑", "⚠️", "❇️", "✳️"],
+            math: ["±", "×", "÷", "≠", "≈", "≌", "≡", "≤", "≥", "≦", "≧", "∝", "∞", "∟", "∠", "∡", "∢", "∬", "∭", "∮", "∯", "∰", "∱", "∲", "∳", "℃", "℉", "㎡", "㎥", "％", "‰", "‱"],
+            geometry: ["■", "□", "▢", "▣", "▤", "▥", "▦", "▧", "▨", "▩", "▪", "▫", "▬", "▭", "▮", "▯", "▰", "▱", "▲", "△", "▴", "▵", "▶", "▷", "▸", "▹", "►", "▼", "▽", "▾", "▿", "◄", "◀", "◆", "◇", "◈", "◉", "◊", "○", "◌", "◍", "◎", "●", "◐", "◑", "◒", "◓", "◔", "◕", "◖", "◗"]
+        };
+
+        let currentCategory = 'popular';
+
+        function switchCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            document.getElementById('symbolSearch').value = '';
+            renderSymbols(symbolData[cat], cat === 'kaomoji');
+        }
+
+        function renderSymbols(arr, isKaomoji = false) {
+            const area = document.getElementById('symbolDisplayArea');
+            if (!arr || arr.length === 0) {
+                area.innerHTML = '<p style="color:var(--desc-text); padding:2rem; text-align:center;">🔍 查無相關符號，請切換關鍵字！</p>';
+                return;
+            }
+
+            if (isKaomoji) {
+                let html = '<div class="kaomoji-grid">';
+                arr.forEach(item => {
+                    html += `<button type="button" class="kaomoji-btn" title="點擊複製此顏文字" aria-label="複製顏文字 ${item}" onclick="copySymbol('${escapeQuotes(item)}')">${item}</button>`;
+                });
+                html += '</div>';
+                area.innerHTML = html;
+            } else {
+                let html = '<div class="symbol-grid">';
+                arr.forEach(item => {
+                    html += `<button type="button" class="symbol-btn" title="點擊複製此符號" aria-label="複製符號 ${item}" onclick="copySymbol('${escapeQuotes(item)}')">${item}</button>`;
+                });
+                html += '</div>';
+                area.innerHTML = html;
+            }
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+
+        function filterSymbols(query) {
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                renderSymbols(symbolData[currentCategory], currentCategory === 'kaomoji');
+                return;
+            }
+
+            let matches = [];
+            for (const key in symbolData) {
+                matches = matches.concat(symbolData[key]);
+            }
+            matches = Array.from(new Set(matches));
+
+            renderSymbols(matches, true);
+        }
+
+        function copySymbol(val) {
+            navigator.clipboard.writeText(val).then(() => {
+                showToast(val);
+            });
+        }
+
+        function showToast(content) {
+            const toast = document.getElementById('toastNotify');
+            document.getElementById('toastContent').innerText = content;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1800);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSymbols(symbolData['popular']);
+        });
+    </script>
+</body>
+</html>

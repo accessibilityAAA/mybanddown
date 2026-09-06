@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上圖片批量浮水印與防盜圖加註工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【圖片批量浮水印與防盜圖加註】工具，支援自訂文字浮水印、圖片 Logo、九宮格定位與密集平鋪，本機純前端處理不上傳。">
+    <meta name="keywords" content="圖片浮水印,防盜圖加壓,水印製作,電商圖片浮水印,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/04-403-img-watermark.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .watermark-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .watermark-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .watermark-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .watermark-stage-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+            overflow: auto;
+        }
+
+        /* 🌟 無障礙聚焦與拖曳高亮樣式 */
+        .drop-zone {
+            border: 0.125rem dashed #ea580c;
+            border-radius: 0.5rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            background: var(--panel-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover { 
+            background: #fff7ed; 
+            border-color: #c2410c;
+            outline: 0.2rem solid #ea580c;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-action {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-action:hover, .btn-action:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+        .btn-action:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上圖片批量浮水印與防盜圖加註工具</li>
+            </ol>
+        </nav>
+
+        <div class="watermark-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                💧 線上圖片批量浮水印與防盜圖加註工具
+            </h1>
+
+            <div class="watermark-layout">
+                <!-- 左側：設定控制面板 -->
+                <div class="watermark-panel">
+                    <!-- 🌟 拖曳與鍵盤聚焦區域 -->
+                    <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="點擊或拖曳圖片檔案至此處上傳" title="點擊或拖曳圖片至此" onclick="document.getElementById('fileInput').click()" onkeydown="handleDropKeydown(event)">
+                        <span style="font-size:2.5rem; display:block; margin-bottom:0.5rem;" aria-hidden="true">🖼️</span>
+                        <span style="font-weight:bold; color:var(--body-text);">點擊選擇或拖曳圖片至此</span>
+                        <span style="font-size:0.8rem; color:var(--desc-text); display:block; margin-top:0.25rem;">(本機純前端處理，檔案絕不上傳)</span>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wmText" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">浮水印文字內文：</label>
+                        <input type="text" id="wmText" class="form-control" value="買便當 mybanddown 僅供認證" title="請輸入浮水印內文" oninput="renderWatermark()">
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="wmColor" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">文字顏色：</label>
+                            <input type="color" id="wmColor" value="#ffffff" class="form-control" style="height:2.5rem; cursor:pointer;" title="請選擇浮水印文字色彩" onchange="renderWatermark()">
+                        </div>
+                        <div>
+                            <label for="wmFontSize" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">字型大小 (px)：</label>
+                            <input type="number" id="wmFontSize" value="32" min="12" max="120" class="form-control" title="請輸入字型大小" oninput="renderWatermark()">
+                        </div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="wmOpacity" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">透明度 (0.1 ~ 1.0)：</label>
+                            <input type="range" id="wmOpacity" min="0.1" max="1.0" step="0.05" value="0.4" class="form-control" title="請滑動調整浮水印透明度" oninput="renderWatermark()">
+                        </div>
+                        <div>
+                            <label for="wmPosition" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.25rem; display:block;">擺放位置：</label>
+                            <select id="wmPosition" class="form-control" title="請選擇浮水印擺放位置" onchange="renderWatermark()">
+                                <option value="tile" selected>🏁 滿版斜向密鋪 (極致防盜)</option>
+                                <option value="center">🎯 正中央</option>
+                                <option value="bottomRight">↘️ 右下角</option>
+                                <option value="bottomLeft">↙️ 左下角</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                            <input type="checkbox" id="textShadow" checked title="勾選以加入黑色文字微陰影，增加複雜底圖下的對比度" onchange="renderWatermark()"> 🌑 啟用文字對比陰影 (提升清晰度)
+                        </label>
+                    </div>
+
+                    <button type="button" class="btn-action" id="downloadBtn" disabled title="下載加註浮水印後的圖片" onclick="downloadImage()">
+                        💧 下載浮水印圖片
+                    </button>
+                </div>
+
+                <!-- 右側：畫布展台 -->
+                <div class="watermark-stage-box">
+                    <div id="statusBox" role="status" aria-live="polite" style="color:var(--desc-text); font-weight:bold;">
+                        請在左側上傳圖片，即可即時預覽加註浮水印的效果！
+                    </div>
+                    <canvas id="watermarkCanvas" role="img" aria-label="浮水印實時預覽展台" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與防盜特色
+                </h2>
+                <p style="max-width:40ch;">
+                    專為商品圖防盜、合約影本壓註「僅供某單位認證使用」而打造。支援全圖滿版斜向密集平鋪，讓有心人士極難以 AI 去除浮水印。所有合成渲染均於本機繪製，圖片絕不上傳，隱私 100% 機密。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 狀態提示 Toast (具備無障礙宣言) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功下載加壓浮水印的圖片！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let canvas, ctx;
+        let loadedImage = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('watermarkCanvas');
+            ctx = canvas.getContext('2d');
+
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    loadImageFile(e.dataTransfer.files[0]);
+                }
+            });
+        });
+
+        function handleDropKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (file) loadImageFile(file);
+        }
+
+        function loadImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('請選擇有效的圖片檔案 (JPG, PNG, WebP)！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    loadedImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    renderWatermark();
+
+                    canvas.style.display = 'block';
+                    document.getElementById('statusBox').style.display = 'none';
+                    document.getElementById('downloadBtn').disabled = false;
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderWatermark() {
+            if (!loadedImage) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(loadedImage, 0, 0);
+
+            const text = document.getElementById('wmText').value.trim();
+            if (!text) return;
+
+            const color = document.getElementById('wmColor').value;
+            const fontSize = parseInt(document.getElementById('wmFontSize').value, 10) || 32;
+            const opacity = parseFloat(document.getElementById('wmOpacity').value) || 0.4;
+            const pos = document.getElementById('wmPosition').value;
+            const hasShadow = document.getElementById('textShadow').checked;
+
+            ctx.save();
+            ctx.font = `bold ${fontSize}px "Segoe UI", Arial, sans-serif`;
+            ctx.fillStyle = color;
+            ctx.globalAlpha = opacity;
+
+            if (hasShadow) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.shadowBlur = 4;
+            }
+
+            if (pos === 'tile') {
+                // 滿版斜向密鋪 (以中心點旋轉平鋪)
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate((-25 * Math.PI) / 180);
+
+                const textWidth = ctx.measureText(text).width + fontSize * 2.5;
+                const stepY = fontSize * 3.5;
+                const diag = Math.hypot(canvas.width, canvas.height);
+
+                for (let y = -diag; y < diag; y += stepY) {
+                    for (let x = -diag; x < diag; x += textWidth) {
+                        ctx.fillText(text, x, y);
+                    }
+                }
+            } else if (pos === 'center') {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            } else if (pos === 'bottomRight') {
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(text, canvas.width - fontSize, canvas.height - fontSize);
+            } else if (pos === 'bottomLeft') {
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(text, fontSize, canvas.height - fontSize);
+            }
+
+            ctx.restore();
+
+            canvas.setAttribute('aria-label', `加註浮水印後的圖片預覽，文字為 ${text}`);
+        }
+
+        function downloadImage() {
+            if (!loadedImage || !canvas) return;
+
+            const link = document.createElement('a');
+            link.download = 'mybanddown_watermarked.png';
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const toast = document.getElementById('toastNotify');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+    </script>
+</body>
+</html>

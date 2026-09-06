@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>團隊公平隨機分組工具 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【團隊公平隨機分組】工具，專為老師教學與辦公室分工設計。支援按組數或每組人數分組、自動指定組長、洗牌音效與一鍵複製結果。100% 本機運算不上傳。">
+    <meta name="keywords" content="隨機分組,自動分組,課堂分組,團隊分組,老師工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-103-random-group.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，解決本機 file:// 開啟時 CSS 消失的問題 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .group-container {
+            display: flex; flex-wrap: wrap; gap: 1.875rem; justify-content: center; align-items: flex-start; margin-top: 1.25rem;
+        }
+        .control-box {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.5625rem; width: 100%; max-width: 23.75rem;
+        }
+        textarea {
+            width: 100%; height: 11.25rem; background: var(--input-bg, #f8fafc); color: var(--body-text, #1e293b); border: 0.0625rem solid var(--border-light, #cbd5e1); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.95rem; outline: none; margin-bottom: 0.9375rem;
+        }
+        .result-box {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.875rem; flex: 1; min-width: 18.75rem; max-width: 42.5rem;
+        }
+        .btn-group {
+            width: 100%; padding: 0.875rem; font-size: 1.15rem; font-weight: bold; color: #ffffff; background: #ea580c; border: none; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; margin-top: 0.625rem;
+        }
+        .btn-group:hover { background: #c2410c; }
+        .groups-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: 1rem; margin-top: 1.25rem;
+        }
+        .group-card {
+            background: var(--panel-bg, #f8fafc); border: 0.0625rem solid var(--border-light, #cbd5e1); border-radius: 0.5rem; padding: 0.9375rem; text-align: left;
+        }
+        .group-card-title {
+            font-size: 1.05rem; font-weight: bold; color: #ea580c; border-bottom: 0.125rem solid #ea580c; padding-bottom: 0.375rem; margin-bottom: 0.625rem; display: flex; justify-content: space-between;
+        }
+        .member-list {
+            list-style: none; padding: 0; margin: 0; font-size: 0.92rem; color: var(--desc-text);
+        }
+        .member-item {
+            padding: 0.25rem 0; border-bottom: 0.0625rem dashed var(--border-light); display: flex; align-items: center; justify-content: space-between;
+        }
+        .leader-badge {
+            font-size: 0.75rem; background: #fef08a; color: #854d0e; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 團隊公平隨機分組工具</li>
+            </ol>
+        </nav>
+
+        <div class="group-container">
+            <!-- 左側：設定控制台 -->
+            <div class="control-box">
+                <h1 style="font-size:1.25rem; color:var(--title-blue); margin-top:0; margin-bottom:0.75rem;">👥 團隊公平隨機分組</h1>
+
+                <label for="memberInput" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">成員名單 (每行一個人名/座號)：</label>
+                <textarea id="memberInput" name="memberInput" title="請輸入參與分組的成員名單，每行一個名字" oninput="updateMemberCount()">1號 張小明
+2號 林小華
+3號 陳大同
+4號 黃阿花
+5號 郭小美
+6號 蔡阿嘎
+7號 許小芬
+8號 鄭大雄
+9號 趙小胖
+10號 廖美麗</textarea>
+
+                <div style="font-size:0.875rem; color:var(--desc-text); margin-bottom:0.9375rem;">
+                    總人數：<strong id="totalCount" style="color:#ea580c;">10</strong> 人
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label for="groupMode" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.375rem;">分組方式：</label>
+                    <select id="groupMode" class="form-control" title="請選擇要按總組數分組或按每組人數分組" onchange="toggleModeInput()">
+                        <option value="numGroups">指定分成幾組 (依組數)</option>
+                        <option value="groupSize">指定每組幾人 (依人數)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label for="targetVal" id="targetLabel" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.375rem;">目標組數：</label>
+                    <input type="number" id="targetVal" class="form-control" title="請輸入要分成的組數或每組人數" value="3" min="1" max="50">
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="assignLeader" title="勾選後系統會隨機為每組指定一位組長"> 👑 自動隨機指定各組組長
+                    </label>
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="soundToggle" title="勾選以啟用隨機洗牌與分牌音效" checked> 🔊 啟用分組洗牌音效
+                    </label>
+                </div>
+
+                <button type="button" class="btn-group" title="點擊進行隨機洗牌與公平分組" onclick="generateGroups()">🎲 開始隨機分組</button>
+            </div>
+
+            <!-- 右側：結果展台 -->
+            <div class="result-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.125rem solid var(--border-light); padding-bottom:0.625rem;">
+                    <h2 style="font-size:1.2rem; color:var(--title-blue); margin:0;">📋 分組結果展台</h2>
+                    <button type="button" id="copyBtn" title="點擊將分組結果文字一鍵複製至剪貼簿" onclick="copyResultText()" style="padding:0.375rem 0.875rem; background:#ea580c; color:#fff; border:none; border-radius:0.375rem; font-size:0.85rem; font-weight:bold; cursor:pointer;" disabled>📋 一鍵複製文字結果</button>
+                </div>
+
+                <div id="resultDisplay" role="status" aria-live="polite">
+                    <p style="color:var(--desc-text); text-align:center; padding:3rem 0;">請在左側輸入名單並設定組數後，點擊「開始隨機分組」！</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let resultData = [];
+        let soundCtx = null;
+
+        function getSoundContext() {
+            if (!soundCtx) {
+                soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (soundCtx.state === 'suspended') {
+                soundCtx.resume();
+            }
+            return soundCtx;
+        }
+
+        function playDealSound() {
+            if (!document.getElementById('soundToggle').checked) return;
+            const ctxAudio = getSoundContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300 + Math.random() * 300, ctxAudio.currentTime);
+            gain.gain.setValueAtTime(0.12, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.04);
+            osc.connect(gain); gain.connect(ctxAudio.destination);
+            osc.start(); osc.stop(ctxAudio.currentTime + 0.04);
+        }
+
+        function updateMemberCount() {
+            const raw = document.getElementById('memberInput').value;
+            const members = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            document.getElementById('totalCount').innerText = members.length;
+        }
+
+        function toggleModeInput() {
+            const mode = document.getElementById('groupMode').value;
+            const label = document.getElementById('targetLabel');
+            label.innerText = mode === 'numGroups' ? '目標組數：' : '每組人數：';
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function generateGroups() {
+            const raw = document.getElementById('memberInput').value;
+            let members = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+            if (members.length === 0) {
+                alert('請先輸入成員名單！');
+                return;
+            }
+
+            const mode = document.getElementById('groupMode').value;
+            const targetVal = parseInt(document.getElementById('targetVal').value, 10);
+            const assignLeader = document.getElementById('assignLeader').checked;
+
+            if (isNaN(targetVal) || targetVal < 1) {
+                alert('請輸入有效的組數或人數！');
+                return;
+            }
+
+            members = shuffle(members);
+
+            let numGroups = 1;
+            if (mode === 'numGroups') {
+                numGroups = Math.min(targetVal, members.length);
+            } else {
+                numGroups = Math.ceil(members.length / targetVal);
+            }
+
+            const groups = Array.from({ length: numGroups }, () => []);
+            members.forEach((m, idx) => {
+                groups[idx % numGroups].push(m);
+            });
+
+            resultData = groups.map((gMembers, idx) => {
+                let leader = '';
+                if (assignLeader && gMembers.length > 0) {
+                    const leaderIdx = Math.floor(Math.random() * gMembers.length);
+                    leader = gMembers[leaderIdx];
+                }
+                return { groupName: `第 ${idx + 1} 組`, members: gMembers, leader: leader };
+            });
+
+            const display = document.getElementById('resultDisplay');
+            display.innerHTML = '<p style="text-align:center; padding:2rem; color:#ea580c; font-weight:bold;">🎲 正在公平隨機分組中...</p>';
+
+            let deals = 0;
+            const dealInterval = setInterval(() => {
+                playDealSound();
+                deals++;
+                if (deals >= 10) {
+                    clearInterval(dealInterval);
+                    renderResultUI();
+                }
+            }, 50);
+        }
+
+        function renderResultUI() {
+            const display = document.getElementById('resultDisplay');
+            if (resultData.length === 0) return;
+
+            let html = '<div class="groups-grid">';
+            resultData.forEach(g => {
+                html += `
+                    <div class="group-card">
+                        <div class="group-card-title">
+                            <span>${g.groupName}</span>
+                            <span style="font-size:0.8rem; color:var(--desc-text);">(${g.members.length}人)</span>
+                        </div>
+                        <ul class="member-list">
+                            ${g.members.map(m => `
+                                <li class="member-item">
+                                    <span>${m}</span>
+                                    ${m === g.leader ? '<span class="leader-badge">👑 組長</span>' : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            display.innerHTML = html;
+            document.getElementById('copyBtn').disabled = false;
+        }
+
+        function copyResultText() {
+            if (resultData.length === 0) return;
+
+            let text = "🍱 買便當 - 隨機分組結果：\n\n";
+            resultData.forEach(g => {
+                text += `【${g.groupName}】(${g.members.length}人)\n`;
+                g.members.forEach(m => {
+                    text += `- ${m}${m === g.leader ? " (👑組長)" : ""}\n`;
+                });
+                text += "\n";
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已成功將分組結果複製至剪貼簿！');
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateMemberCount);
+    </script>
+</body>
+</html>

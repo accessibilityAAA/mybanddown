@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上房貸試算與本息本金均償試算器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【房貸試算與本息本金均償試算器】工具，即時計算每月房貸負擔、寬限期、總利息與本息/本金均償對比，支援新青安貸款優惠條件設定。100% 免費本機純前端運算。">
+    <meta name="keywords" content="房貸試算,本息均償,本金均償,寬限期試算,買房貸款,新青安房貸,房貸試算器,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/05-503-mortgage-calc.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .mortgage-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .mortgage-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .mortgage-panel {
+            flex: 1 1 18.75rem;
+            min-width: 0;
+        }
+
+        .mortgage-result-box {
+            flex: 1 1 22.5rem;
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: var(--desc-text, #64748b);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #ea580c;
+        }
+
+        .btn-calc {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-calc:hover, .btn-calc:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-preset {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .btn-preset:hover, .btn-preset:focus-visible {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 28rem) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 線上房貸試算與本息本金均償試算器</li>
+            </ol>
+        </nav>
+
+        <div class="mortgage-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🏠 線上房貸試算與本息本金均償試算器
+            </h1>
+
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn-preset" title="快速帶入新青安優惠房貸條件 (1000萬/40年/寬限5年/1.775%)" onclick="applyYouthPreset()">
+                    🏡 一鍵帶入「新青安優惠房貸」條件
+                </button>
+            </div>
+
+            <div class="mortgage-layout">
+                <!-- 左側：輸入表單 -->
+                <div class="mortgage-panel">
+                    <div class="form-group">
+                        <label for="totalPrice" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">房屋總價 (萬元)：</label>
+                        <input type="number" id="totalPrice" value="1500" min="100" max="10000" class="form-control" title="請輸入房屋總價格" oninput="calculateMortgage()">
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="loanRatio" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">貸款成數 (%)：</label>
+                            <select id="loanRatio" class="form-control" title="請選擇貸款成數" onchange="calculateMortgage()">
+                                <option value="85">85 成</option>
+                                <option value="80" selected>80 成 (常態)</option>
+                                <option value="75">75 成</option>
+                                <option value="70">70 成</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="loanYears" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">貸款年限 (年)：</label>
+                            <select id="loanYears" class="form-control" title="請選擇貸款年限" onchange="calculateMortgage()">
+                                <option value="40">40 年</option>
+                                <option value="30" selected>30 年 (主流)</option>
+                                <option value="20">20 年</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div>
+                            <label for="interestRate" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">房貸年利率 (%)：</label>
+                            <input type="number" id="interestRate" value="2.185" step="0.001" min="0.1" max="10" class="form-control" title="請輸入房貸年利率" oninput="calculateMortgage()">
+                        </div>
+                        <div>
+                            <label for="gracePeriod" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">寬限期 (年)：</label>
+                            <select id="gracePeriod" class="form-control" title="請選擇寬限期年數" onchange="calculateMortgage()">
+                                <option value="0" selected>無寬限期</option>
+                                <option value="1">1 年</option>
+                                <option value="2">2 年</option>
+                                <option value="3">3 年</option>
+                                <option value="5">5 年</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="repayType" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">還款方式：</label>
+                        <select id="repayType" class="form-control" title="請選擇房貸還款方式" onchange="calculateMortgage()">
+                            <option value="averageInterest" selected>本息平均攤還 (每月還款固定，推薦上班族)</option>
+                            <option value="averagePrincipal">本金平均攤還 (後期遞減，總利息較省)</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-calc" title="點擊計算房貸月負擔" onclick="calculateMortgage()">
+                        ⚡ 實時試算房貸負擔
+                    </button>
+                </div>
+
+                <!-- 右側：結果展示 (具備無障礙宣言) -->
+                <div class="mortgage-result-box" id="resultBox" role="status" aria-live="polite">
+                    <div class="metric-card">
+                        <div class="metric-title">貸款總金額 / 自備款金額</div>
+                        <div style="font-size:1.15rem; font-weight:bold; color:var(--body-text);">
+                            貸款：<strong id="loanTotalVal" style="color:#ea580c;">1,200</strong> 萬 | 自備：<strong id="downPaymentVal">300</strong> 萬
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">每月需還款金額 (正式還本息期)</div>
+                        <div class="metric-value" id="monthPayVal">45,463 <span style="font-size:1rem; font-weight:normal;">元/月</span></div>
+                        <div id="principalDetail" style="font-size:0.85rem; color:var(--desc-text); margin-top:0.25rem; display:none;">
+                            首月：<strong id="firstMonthVal">0</strong> 元 | 末月：<strong id="lastMonthVal">0</strong> 元 (每月約少繳 <span id="diffVal">0</span> 元)
+                        </div>
+                        <div id="graceInfo" style="font-size:0.85rem; color:#22c55e; margin-top:0.25rem; display:none;">寬限期內僅需繳利息：<strong id="gracePayVal">0</strong> 元/月</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">總利息支出金額</div>
+                        <div class="metric-value" id="totalInterestVal" style="color:#ef4444;">4,366,680 <span style="font-size:1rem; font-weight:normal;">元</span></div>
+                    </div>
+
+                    <div style="background:var(--card-bg); border:0.0625rem solid var(--border-light); border-radius:0.5rem; padding:0.875rem; font-size:0.875rem; line-height:1.6;">
+                        <strong>💡 房貸理財溫馨提示：</strong><br>
+                        • 建議每月房貸負擔不超過家庭總月收入的 <strong>1/3 ~ 1/2</strong>。<br>
+                        • 貸款總還款金額：<strong id="totalPayVal">16,366,680</strong> 元。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與本息/本金均償差異
+                </h2>
+                <p style="max-width:40ch;">
+                    <strong>本息平均攤還</strong>：把貸款本金與總利息平均分算至每月，每月繳款金額固定，方便資金規劃。<br>
+                    <strong>本金平均攤還</strong>：每月還固定的本金，利息隨本金減少而逐月遞減。雖然前期負擔較重，但總利息支出顯著減少。所有試算皆於本機運算不上傳。
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function applyYouthPreset() {
+            document.getElementById('totalPrice').value = '1250';
+            document.getElementById('loanRatio').value = '80';
+            document.getElementById('loanYears').value = '40';
+            document.getElementById('interestRate').value = '1.775';
+            document.getElementById('gracePeriod').value = '5';
+            document.getElementById('repayType').value = 'averageInterest';
+            calculateMortgage();
+        }
+
+        function calculateMortgage() {
+            const totalPriceWan = parseFloat(document.getElementById('totalPrice').value) || 0;
+            const loanRatio = parseFloat(document.getElementById('loanRatio').value) / 100;
+            const loanYears = parseInt(document.getElementById('loanYears').value, 10);
+            const rateYear = parseFloat(document.getElementById('interestRate').value) / 100;
+            const graceYears = parseInt(document.getElementById('gracePeriod').value, 10);
+            const repayType = document.getElementById('repayType').value;
+
+            if (totalPriceWan <= 0 || rateYear <= 0) return;
+
+            const loanTotal = totalPriceWan * 10000 * loanRatio;
+            const downPayment = totalPriceWan * 10000 * (1 - loanRatio);
+            const totalMonths = loanYears * 12;
+            const graceMonths = graceYears * 12;
+            const repayMonths = totalMonths - graceMonths;
+            const rateMonth = rateYear / 12;
+
+            document.getElementById('loanTotalVal').innerText = (loanTotal / 10000).toLocaleString();
+            document.getElementById('downPaymentVal').innerText = (downPayment / 10000).toLocaleString();
+
+            let monthPay = 0;
+            let gracePay = Math.round(loanTotal * rateMonth);
+            let totalInterest = 0;
+
+            if (graceYears > 0) {
+                document.getElementById('graceInfo').style.display = 'block';
+                document.getElementById('gracePayVal').innerText = gracePay.toLocaleString();
+            } else {
+                document.getElementById('graceInfo').style.display = 'none';
+            }
+
+            const principalDetail = document.getElementById('principalDetail');
+
+            if (repayType === 'averageInterest') {
+                // 本息平均攤還
+                principalDetail.style.display = 'none';
+                const pow = Math.pow(1 + rateMonth, repayMonths);
+                monthPay = Math.round((loanTotal * rateMonth * pow) / (pow - 1));
+
+                totalInterest = (graceMonths * gracePay) + (repayMonths * monthPay) - loanTotal;
+            } else {
+                // 本金平均攤還
+                principalDetail.style.display = 'block';
+                const basePrincipal = loanTotal / repayMonths;
+                const firstMonthPay = Math.round(basePrincipal + (loanTotal * rateMonth));
+                const lastMonthPay = Math.round(basePrincipal + (basePrincipal * rateMonth));
+                const diffPay = Math.round(basePrincipal * rateMonth);
+
+                monthPay = firstMonthPay; // 預設顯示首月最高負擔
+
+                document.getElementById('firstMonthVal').innerText = firstMonthPay.toLocaleString();
+                document.getElementById('lastMonthVal').innerText = lastMonthPay.toLocaleString();
+                document.getElementById('diffVal').innerText = diffPay.toLocaleString();
+
+                let remainingPrincipal = loanTotal;
+                let sumInterest = graceMonths * gracePay;
+                for (let i = 0; i < repayMonths; i++) {
+                    const currentInterest = remainingPrincipal * rateMonth;
+                    sumInterest += currentInterest;
+                    remainingPrincipal -= basePrincipal;
+                }
+                totalInterest = Math.round(sumInterest);
+            }
+
+            const totalPay = Math.round(loanTotal + totalInterest);
+
+            document.getElementById('monthPayVal').innerHTML = `${monthPay.toLocaleString()} <span style="font-size:1rem; font-weight:normal;">元/月 ${repayType === 'averagePrincipal' ? '(首月)' : ''}</span>`;
+            document.getElementById('totalInterestVal').innerHTML = `${totalInterest.toLocaleString()} <span style="font-size:1rem; font-weight:normal;">元</span>`;
+            document.getElementById('totalPayVal').innerText = totalPay.toLocaleString();
+        }
+
+        document.addEventListener('DOMContentLoaded', calculateMortgage);
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機亂數號碼抽籤器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【隨機亂數號碼抽籤器】工具，支援範圍號碼抽取、排除特定數字、重複性設定、樂透搖獎動畫與音效。100% 免費本機運算不上傳。">
+    <meta name="keywords" content="亂數產生器,隨機抽號碼,樂透開號,座號抽籤,抽獎工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/01-106-number-gen.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .num-container {
+            display: flex; flex-wrap: wrap; gap: 1.875rem; justify-content: center; align-items: flex-start; margin-top: 1.25rem;
+        }
+        .control-panel {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.5625rem; width: 100%; max-width: 23.75rem;
+        }
+        .stage-panel {
+            background: var(--card-bg, #ffffff); border: 0.0625rem solid var(--border-light, #e2e8f0); border-radius: 0.75rem; padding: 1.875rem; flex: 1; min-width: 18.75rem; max-width: 42.5rem; text-align: center;
+        }
+        .lottery-ball-stage {
+            background: var(--panel-bg, #f8fafc); border: 0.125rem dashed var(--border-light, #cbd5e1); border-radius: 0.75rem; padding: 2rem 1rem; margin: 1.25rem 0; min-height: 12.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.75rem;
+        }
+        .num-ball {
+            width: 4rem; height: 4rem; background: radial-gradient(circle at 30% 30%, #fb923c, #ea580c); color: #ffffff; font-size: 1.6rem; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.3); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .form-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.9375rem;
+        }
+        .btn-gen {
+            width: 100%; padding: 0.875rem; font-size: 1.15rem; font-weight: bold; color: #ffffff; background: #ea580c; border: none; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; margin-top: 0.625rem;
+        }
+        .btn-gen:hover { background: #c2410c; }
+        
+        /* 📱 手機端極致 RWD 自動降級單欄 */
+        @media (max-width: 28rem) {
+            .form-grid { grid-template-columns: 1fr; }
+            .num-ball { width: 3.25rem; height: 3.5rem; font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 1.25rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 隨機亂數號碼抽籤器</li>
+            </ol>
+        </nav>
+
+        <div class="num-container">
+            <!-- 設定面板 -->
+            <div class="control-panel">
+                <h1 style="font-size:1.25rem; color:var(--title-blue); margin-top:0; margin-bottom:0.75rem;">🔢 隨機號碼產生器</h1>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="minNum" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">最小數字：</label>
+                        <input type="number" id="minNum" class="form-control" title="請輸入允許抽取的最小數字" value="1">
+                    </div>
+                    <div>
+                        <label for="maxNum" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">最大數字：</label>
+                        <input type="number" id="maxNum" class="form-control" title="請輸入允許抽取的最大數字" value="45">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label for="drawAmount" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">抽取數量 (幾個數字)：</label>
+                    <input type="number" id="drawAmount" class="form-control" title="請輸入一次要產生的號碼數量" value="6" min="1" max="1000">
+                </div>
+
+                <div style="margin-bottom:0.9375rem;">
+                    <label for="excludeInput" style="font-size:0.85rem; font-weight:bold; color:var(--desc-text); display:block; margin-bottom:0.25rem;">排除號碼 (用逗號隔開)：</label>
+                    <input type="text" id="excludeInput" class="form-control" title="請輸入不希望被抽到的數字，用逗號或空格分隔" placeholder="例如: 4, 14, 24">
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="allowRepeat" title="勾選後產生的號碼可能會重複"> 🔄 允許產生重複號碼
+                    </label>
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="sortResult" title="勾選後抽出的號碼會自動由小到大排序" checked> 📈 結果自動從小到大排序
+                    </label>
+                    <label style="font-size:0.875rem; color:var(--desc-text); cursor:pointer;">
+                        <input type="checkbox" id="soundToggle" title="勾選以啟用開號音效" checked> 🔊 啟用搖獎開號音效
+                    </label>
+                </div>
+
+                <button type="button" class="btn-gen" title="點擊進行隨機亂數號碼生成" onclick="generateNumbers()">🎲 產生隨機號碼</button>
+            </div>
+
+            <!-- 展示舞台 -->
+            <div class="stage-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.125rem solid var(--border-light); padding-bottom:0.625rem;">
+                    <h2 style="font-size:1.2rem; color:var(--title-blue); margin:0;">🎉 抽籤開號展台</h2>
+                    <button type="button" id="copyBtn" title="點擊複製開號結果文字至剪貼簿" onclick="copyNumbers()" style="padding:0.375rem 0.875rem; background:#ea580c; color:#fff; border:none; border-radius:0.375rem; font-size:0.85rem; font-weight:bold; cursor:pointer;" disabled>📋 複製結果</button>
+                </div>
+
+                <div class="lottery-ball-stage" id="ballStage" role="status" aria-live="polite">
+                    <span style="color:var(--desc-text);">請在左側設定範圍與數量，並點擊「產生隨機號碼」！</span>
+                </div>
+
+                <div id="statsText" style="font-size:0.9rem; color:var(--desc-text); text-align:left; margin-top:1rem;"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="global-footer"></div>
+
+    <script>
+        let currentResults = [];
+        let soundCtx = null;
+
+        function getSoundContext() {
+            if (!soundCtx) {
+                soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (soundCtx.state === 'suspended') {
+                soundCtx.resume();
+            }
+            return soundCtx;
+        }
+
+        function playPopSound() {
+            if (!document.getElementById('soundToggle').checked) return;
+            const ctxAudio = getSoundContext();
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(500 + Math.random() * 300, ctxAudio.currentTime);
+            gain.gain.setValueAtTime(0.15, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.08);
+            osc.connect(gain); gain.connect(ctxAudio.destination);
+            osc.start(); osc.stop(ctxAudio.currentTime + 0.08);
+        }
+
+        function generateNumbers() {
+            const min = parseInt(document.getElementById('minNum').value, 10);
+            const max = parseInt(document.getElementById('maxNum').value, 10);
+            const amount = parseInt(document.getElementById('drawAmount').value, 10);
+            const allowRepeat = document.getElementById('allowRepeat').checked;
+            const sortResult = document.getElementById('sortResult').checked;
+
+            if (isNaN(min) || isNaN(max) || min >= max) {
+                alert('請輸入有效的數字範圍 (最小值必須小於最大值)！');
+                return;
+            }
+
+            if (isNaN(amount) || amount < 1) {
+                alert('請輸入有效的抽取數量！');
+                return;
+            }
+
+            // 解析排除名單
+            const rawExclude = document.getElementById('excludeInput').value;
+            const excludes = new Set(rawExclude.split(/[, Space\s]+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n)));
+
+            // 建立可用號碼池
+            let pool = [];
+            for (let i = min; i <= max; i++) {
+                if (!excludes.has(i)) pool.push(i);
+            }
+
+            if (!allowRepeat && amount > pool.length) {
+                alert(`在不重複情況下，可用數字僅有 ${pool.length} 個，不足以抽取 ${amount} 個！`);
+                return;
+            }
+
+            currentResults = [];
+            if (allowRepeat) {
+                for (let i = 0; i < amount; i++) {
+                    const randIndex = Math.floor(Math.random() * pool.length);
+                    currentResults.push(pool[randIndex]);
+                }
+            } else {
+                // 費雪耶茲 (Fisher-Yates) 隨機洗牌演算法
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                currentResults = pool.slice(0, amount);
+            }
+
+            if (sortResult) {
+                currentResults.sort((a, b) => a - b);
+            }
+
+            renderBalls();
+        }
+
+        function renderBalls() {
+            const stage = document.getElementById('ballStage');
+            stage.innerHTML = '';
+
+            currentResults.forEach((num, idx) => {
+                setTimeout(() => {
+                    const ball = document.createElement('div');
+                    ball.className = 'num-ball';
+                    ball.innerText = num;
+                    ball.setAttribute('aria-label', `開出號碼 ${num}`);
+                    stage.appendChild(ball);
+                    playPopSound();
+                }, idx * 100);
+            });
+
+            document.getElementById('statsText').innerText = `📊 統計摘要：共抽出 ${currentResults.length} 個號碼 (範圍 ${document.getElementById('minNum').value} ~ ${document.getElementById('maxNum').value})`;
+            document.getElementById('copyBtn').disabled = false;
+        }
+
+        function copyNumbers() {
+            if (currentResults.length === 0) return;
+            const text = currentResults.join(', ');
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`已成功複製隨機號碼：\n${text}`);
+            });
+        }
+    </script>
+</body>
+</html>

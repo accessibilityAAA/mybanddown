@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG 酷文字與藝術字體生成器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【IG 酷文字與藝術字體生成器】工具，一鍵生成草書、花體、哥德體、雙線字與圓圈黑底字，專為 IG 自介與貼文打造。100% 免費本機純前端運算。">
+    <meta name="keywords" content="IG字體,酷文字,藝術字體,草書生成,IG自介,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-203-fancy-text.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .fancy-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .input-wrapper {
+            margin-bottom: 1.25rem;
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 6.25rem;
+            background: var(--input-bg, #ffffff);
+            color: var(--body-text, #0f172a);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.875rem;
+            font-size: 1.1rem;
+            outline: none;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        /* 滿版網格 */
+        .fancy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .fancy-box {
+            background: var(--panel-bg, #f8fafc);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.75rem;
+            box-sizing: border-box;
+        }
+
+        .fancy-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--desc-text, #64748b);
+            border-bottom: 0.0625rem dashed var(--border-light);
+            padding-bottom: 0.375rem;
+        }
+
+        .fancy-content {
+            font-size: 1.25rem;
+            color: var(--body-text);
+            word-break: break-all;
+            min-height: 2.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-copy-fancy {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.4rem 0.875rem;
+            border-radius: 0.375rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-self: flex-end;
+        }
+        .btn-copy-fancy:hover, .btn-copy-fancy:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        /* 複製提示 Toast (具備無障礙狀態) */
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 28rem) {
+            .fancy-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / IG 酷文字與藝術字體生成器</li>
+            </ol>
+        </nav>
+
+        <div class="fancy-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🔤 IG 酷文字與藝術字體生成器
+            </h1>
+
+            <div class="input-wrapper">
+                <label for="fancyInput" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text); margin-bottom:0.375rem; display:block;">請輸入英文字母或數字 (例如: MyBandDown 2026)：</label>
+                <textarea id="fancyInput" name="fancyInput" placeholder="請在此輸入英文內容..." title="請輸入要轉換為 IG 酷字體的英文或數字" oninput="convertFancyText()">MyBandDown</textarea>
+            </div>
+
+            <div id="fancyDisplayGrid" class="fancy-grid" role="status" aria-live="polite">
+                <!-- 動態注入字體展台 -->
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與社群應用
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具利用 Unicode 特殊字元對照，將輸入的英文字母與數字極速轉換為各式社群酷字體。相容性高且不需額外安裝特殊字型，可直接複製貼至 Instagram 個人簡介 (Bio)、貼文內文、FB 留言或遊戲暱稱。100% 本機純前端極速運算，資料絕不上傳！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 複製成功提示聲明 (具備螢幕報讀功能) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製藝術字體！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        const fontStyles = [
+            { name: "✨ 雙線字體 (Double-struck)", map: (s) => mapUnicode(s, 0x1D538, 0x1D552, 0x1D7D8) },
+            { name: "🖋️ 花體草書 (Script)", map: (s) => mapScriptFont(s) },
+            { name: "🖤 黑底圓圈 (Circled Negative)", map: (s) => mapCircled(s, true) },
+            { name: "⚪ 白底圓圈 (Circled)", map: (s) => mapCircled(s, false) },
+            { name: "🏰 哥德字體 (Gothic/Fraktur)", map: (s) => mapUnicode(s, 0x1D504, 0x1D51E, null) },
+            { name: "💪 粗體 (Bold)", map: (s) => mapUnicode(s, 0x1D400, 0x1D41A, 0x1D7CE) },
+            { name: "📐 打字機體 (Monospace)", map: (s) => mapUnicode(s, 0x1D670, 0x1D68A, 0x1D7F6) },
+            { name: "🅰️ 全形字體 (Full-width)", map: (s) => mapFullWidth(s) }
+        ];
+
+        function convertFancyText() {
+            const input = document.getElementById('fancyInput').value;
+            const grid = document.getElementById('fancyDisplayGrid');
+
+            if (!input.trim()) {
+                grid.innerHTML = '<p style="color:var(--desc-text); padding:1rem;">請在上方輸入英文內容以生成藝術字體！</p>';
+                return;
+            }
+
+            let html = '';
+            fontStyles.forEach(style => {
+                const converted = style.map(input);
+                html += `
+                    <div class="fancy-box">
+                        <div class="fancy-title">${style.name}</div>
+                        <div class="fancy-content">${converted}</div>
+                        <button type="button" class="btn-copy-fancy" title="點擊複製此 ${style.name} 字體" aria-label="複製 ${style.name} 字體" onclick="copyFancy('${escapeQuote(converted)}')">📋 複製字體</button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function mapUnicode(str, upperBase, lowerBase, numBase) {
+            return str.split('').map(ch => {
+                const code = ch.charCodeAt(0);
+                if (code >= 65 && code <= 90 && upperBase) {
+                    return String.fromCodePoint(upperBase + (code - 65));
+                } else if (code >= 97 && code <= 122 && lowerBase) {
+                    return String.fromCodePoint(lowerBase + (code - 97));
+                } else if (code >= 48 && code <= 57 && numBase) {
+                    return String.fromCodePoint(numBase + (code - 48));
+                }
+                return ch;
+            }).join('');
+        }
+
+        // 精準草書/花體對照 (相容 Unicode BMP 歷史留存字元)
+        function mapScriptFont(str) {
+            const scriptUpper = {
+                'A':'𝒜','B':'ℬ','C':'𝒞','D':'𝒟','E':'ℰ','F':'ℱ','G':'𝒢','H':'ℋ','I':'ℐ',
+                'J':'𝒥','K':'𝒦','L':'ℒ','M':'ℳ','N':'𝒩','O':'𝒪','P':'𝒫','Q':'𝒬','R':'ℛ',
+                'S':'𝒮','T':'𝒯','U':'𝒰','V':'𝒱','W':'𝒲','X':'𝒳','Y':'𝒴','Z':'𝒵'
+            };
+            const scriptLower = {
+                'a':'𝒶','b':'𝒷','c':'𝒸','d':'𝒹','e':'ℯ','f':'𝒻','g':'ℊ','h':'𝒽','i':'𝒾',
+                'j':'𝒿','k':'𝓀','l':'𝓁','m':'𝓂','n':'𝓃','o':'𝑜','p':'𝓅','q':'𝓆','r':'𝓇',
+                's':'𝓈','t':'𝓉','u':'𝓊','v':'𝓋','w':'𝓌','x':'𝓍','y':'𝓎','z':'𝓏'
+            };
+            return str.split('').map(ch => scriptUpper[ch] || scriptLower[ch] || ch).join('');
+        }
+
+        function mapCircled(str, isNegative) {
+            return str.split('').map(ch => {
+                const code = ch.charCodeAt(0);
+                if (code >= 65 && code <= 90) {
+                    return String.fromCodePoint((isNegative ? 0x1F150 : 0x24B6) + (code - 65));
+                } else if (code >= 97 && code <= 122) {
+                    return String.fromCodePoint((isNegative ? 0x1F150 : 0x24D0) + (code - 97));
+                } else if (code >= 49 && code <= 57) {
+                    return String.fromCodePoint((isNegative ? 0x2776 : 0x2460) + (code - 49));
+                }
+                return ch;
+            }).join('');
+        }
+
+        function mapFullWidth(str) {
+            return str.split('').map(ch => {
+                const code = ch.charCodeAt(0);
+                if (code >= 33 && code <= 126) {
+                    return String.fromCharCode(code + 65248);
+                } else if (code === 32) {
+                    return '\u3000';
+                }
+                return ch;
+            }).join('');
+        }
+
+        function escapeQuote(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function copyFancy(val) {
+            navigator.clipboard.writeText(val).then(() => {
+                const toast = document.getElementById('toastNotify');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', convertFancyText);
+    </script>
+</body>
+</html>

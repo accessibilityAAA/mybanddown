@@ -1,0 +1,108 @@
+!DOCTYPE html
+html lang=zh-TW
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    !-- 1. 明確無重複的網頁標題 --
+    title工具名稱 - 買便當 mybanddowntitle
+    
+    meta name=description content=免費線上【工具名稱】工具，純前端本機運算不上傳，專為上班族與師生打造。
+    meta name=keywords content=工具關鍵字,買便當,mybanddown
+    meta name=author content=買便當 mybanddown
+    meta name=robots content=index, follow
+    meta name=theme-color content=#ea580c
+
+    link rel=canonical href=httpswww.mybanddown.com你的工具檔名.html
+
+    script
+        if (localStorage.getItem('theme') === 'dark'  (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () = document.body.classList.add('dark-mode'));
+        }
+    script
+
+    link rel=stylesheet href=cssmain.css
+    script src=jscomponents.js deferscript
+
+    style
+         2. 限制欄寬不超過相對單位與 40 個中文字 
+        .tool-card-box {
+            max-width 50rem;
+            margin 0 auto;
+        }
+        .tool-intro {
+            max-width 40ch;
+            margin-bottom 1.25rem;
+        }
+    style
+head
+body
+
+    !-- 3. 跳頁連結：title 做補充說明，絕不重複連結文字 --
+    a href=#main-content class=skip-link title=快速跳轉至網頁主要內容區塊跳過導覽選單，直接進入主要內容區a
+
+    !-- 動態注入 Header --
+    div id=global-headerdiv
+
+    !-- 主要內容區 --
+    main class=main-container id=main-content role=main tabindex=-1
+
+        !-- 麵包屑導航與定位點 --
+        nav aria-label=麵包屑導航 class=breadcrumb style=margin-top0.625rem; margin-bottom 1.25rem;
+            ol style=list-stylenone; padding0; displayflex; gap0.375rem; font-size0.9rem; color#64748b;
+                li
+                    a href=javascriptvoid(0) id=accesskey-C accesskey=C tabindex=0 title=定位主要內容區快速鍵 [Alt+C] style=text-decorationnone; colorinherit;
+                        span style=color#ea580c; font-weightbold; margin-right0.25rem;主要內容區定位點span
+                    a
+                    a href=index.html title=點擊返回買便當網站首頁大廳 style=color#ea580c; font-weightbold; text-decorationnone;首頁a
+                li
+                li aria-current=page  工具名稱li
+            ol
+        nav
+
+        !-- 工具核心區塊 --
+        div class=tool-card-box
+            h1 style=colorvar(--title-blue); font-size1.5rem; margin-bottom0.75rem; border-bottom0.125rem solid var(--border-light); padding-bottom0.5rem;
+                🛠️ 工具名稱標題
+            h1
+            p class=tool-intro style=colorvar(--desc-text);
+                這裡寫工具簡介說明，請簡明扼要說明功能與使用方式。
+            p
+
+            !-- 表單控制區域範例 --
+            div style=margin-bottom 1.25rem;
+                label for=user-input style=font-weightbold; displayblock; margin-bottom0.375rem;請輸入資料：label
+                !-- 4. 表單元件：必有 id 對應 label，且具備非空與補充說明的 title --
+                input type=text id=user-input name=user-input class=form-control title=請在此輸入要進行運算的資料 placeholder=請輸入...
+            div
+
+            !-- 操作按鈕範例 --
+            div style=margin-bottom 1.25rem;
+                button type=button class=btn-primary title=點擊開始進行資料運算 onclick=calculateResult() style=background#ea580c; color#fff; bordernone; padding0.625rem 1.25rem; border-radius0.375rem; font-weightbold; cursorpointer;
+                    🚀 開始計算
+                button
+            div
+
+            !-- 5. 動態結果顯示區：加 aria-live 讓螢幕報讀軟體能主動朗讀新結果 --
+            div id=result-display role=status aria-live=polite style=backgroundvar(--panel-bg); border0.0625rem solid var(--border-light); padding1.25rem; border-radius0.5rem; font-weightbold; color#ea580c;
+                等待運算中...
+            div
+        div
+
+    main
+
+    !-- 動態注入 Footer --
+    div id=global-footerdiv
+
+    script
+        function calculateResult() {
+            const inputVal = document.getElementById('user-input').value;
+            if(!inputVal) {
+                document.getElementById('result-display').innerText = '請先輸入資料！';
+                return;
+            }
+            document.getElementById('result-display').innerText = '運算結果：' + inputVal;
+        }
+    script
+body
+html

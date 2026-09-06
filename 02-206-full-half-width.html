@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全形半形文字一鍵轉換器 - 買便當 mybanddown</title>
+    
+    <meta name="description" content="免費線上【全形半形文字一鍵轉換器】工具，支援英文字母、數字與標點符號全半形雙向轉換。100% 免費本機純前端運算不上傳。">
+    <meta name="keywords" content="全形轉半形,半形轉全形,全半形轉換,標點符號轉換,公文排版,小編工具,買便當,mybanddown">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/02-206-full-half-width.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 顯式引入 CSS 標籤，保證本機 file:// 開啟不失真 -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- 全站 Header / Footer 與元件注入腳本 -->
+    <script src="js/components.js" defer></script>
+
+    <style>
+        .convert-card {
+            background: var(--card-bg, #ffffff);
+            border: 0.0625rem solid var(--border-light, #e2e8f0);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.03);
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .convert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .text-box-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 14rem;
+            background: var(--input-bg, #ffffff);
+            color: var(--body-text, #0f172a);
+            border: 0.0625rem solid var(--border-light, #cbd5e1);
+            border-radius: 0.5rem;
+            padding: 0.875rem;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 0.625rem;
+            flex-wrap: wrap;
+            margin: 1.25rem 0;
+            justify-content: center;
+        }
+
+        .btn-action {
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 0.25rem 0.5rem rgba(234, 88, 12, 0.25);
+        }
+        .btn-action:hover, .btn-action:focus-visible { 
+            background: #c2410c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .btn-secondary {
+            background: var(--panel-bg);
+            border: 0.0625rem solid var(--border-light);
+            color: var(--body-text);
+            padding: 0.75rem 1.25rem;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover, .btn-secondary:focus-visible { 
+            border-color: #ea580c; 
+            color: #ea580c; 
+            outline: 0.2rem solid #ea580c;
+        }
+
+        .info-desc-box {
+            background: var(--panel-bg, #f8fafc);
+            border-top: 0.125rem solid var(--border-light, #cbd5e1);
+            padding: 1.25rem 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-desc-box p {
+            color: var(--desc-text);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5rem);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-notify.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 28rem) {
+            .convert-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 無障礙跳頁連結：title 為補充操作提示說明，不重複連結內文 -->
+    <a href="#main-content" class="skip-link" title="快速跳轉至網頁主要內容區塊">跳過導覽選單，直接進入主要內容區</a>
+    <div id="global-header"></div>
+
+    <main class="main-container" id="main-content" role="main" tabindex="-1">
+
+        <nav aria-label="麵包屑導航" class="breadcrumb" style="margin-top:0.625rem; margin-bottom: 0.9375rem;">
+            <ol style="list-style:none; padding:0; display:flex; gap:0.375rem; font-size:0.9rem; color:#64748b;">
+                <li>
+                    <a href="javascript:void(0)" id="accesskey-C" accesskey="C" tabindex="0" title="定位主要內容區快速鍵 [Alt+C]" style="text-decoration:none; color:inherit;">
+                        <span style="color:#ea580c; font-weight:bold; margin-right:0.25rem;">:::主要內容區定位點</span>
+                    </a>
+                    <a href="index.html" title="點擊回到買便當首頁大廳" style="color:#ea580c; font-weight:bold; text-decoration:none;">首頁</a>
+                </li>
+                <li aria-current="page"> / 全形半形文字一鍵轉換器</li>
+            </ol>
+        </nav>
+
+        <div class="convert-card">
+            <h1 style="color:var(--title-blue); font-size:1.35rem; margin-top:0; margin-bottom:0.75rem;">
+                🌗 全形半形文字一鍵轉換器
+            </h1>
+
+            <!-- 核心轉換按鈕群 -->
+            <div class="action-bar">
+                <button type="button" class="btn-action" title="將所有全形字體與標點符號轉換為半形" onclick="convertWidth('toHalf')">🌗 全形轉半形</button>
+                <button type="button" class="btn-action" title="將所有半形字體與標點符號轉換為全形" onclick="convertWidth('toFull')">🌓 半形轉全形</button>
+                <button type="button" class="btn-secondary" title="清除所有多餘空格與重複空白" onclick="removeSpaces()">🧹 移除多餘空格</button>
+                <button type="button" class="btn-secondary" title="複製轉換結果文字" onclick="copyOutput()">📋 複製結果</button>
+            </div>
+
+            <!-- 輸入與輸出兩欄網格 -->
+            <div class="convert-grid">
+                <div class="text-box-group">
+                    <label for="inputText" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text);">原始文字內容：</label>
+                    <textarea id="inputText" placeholder="請在此貼上或輸入要轉換的文字內容..." title="請輸入要轉換的原始文字" oninput="autoConvert()"></textarea>
+                </div>
+
+                <div class="text-box-group">
+                    <label for="outputText" style="font-size:0.9rem; font-weight:bold; color:var(--desc-text);">轉換結果展示：</label>
+                    <textarea id="outputText" readonly placeholder="轉換後的文字將在此即時呈現..." title="全半形轉換後的結果" role="status" aria-live="polite"></textarea>
+                </div>
+            </div>
+
+            <!-- 📄 說明區 -->
+            <div class="info-desc-box">
+                <h2 style="color:var(--title-blue); font-size:1rem; margin-bottom:0.375rem; margin-top:0;">
+                    💡 使用說明與轉換規則
+                </h2>
+                <p style="max-width:40ch;">
+                    本工具能精確識別英文字母、數字（0-9）以及全半形標點符號（如逗號、句號、問號、驚嘆號等）並進行雙向轉換。非常適合公文排版、程式碼整理與表格校對。所有運算皆於您的瀏覽器本機進行，資料不上傳！
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 複製成功提示聲明 (具備螢幕報讀功能) -->
+    <div class="toast-notify" id="toastNotify" role="status" aria-live="polite">已成功複製轉換結果！</div>
+
+    <div id="global-footer"></div>
+
+    <script>
+        function convertWidth(mode) {
+            const input = document.getElementById('inputText').value;
+            let output = '';
+
+            if (mode === 'toHalf') {
+                // 全形轉半形 (含英文字母、數字、全形空格及常用中文標點備援)
+                output = input.replace(/[\uFF01-\uFF5E]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+                              .replace(/\u3000/g, ' ')
+                              .replace(/。/g, '.')
+                              .replace(/，/g, ',')
+                              .replace(/、/g, ',')
+                              .replace(/：/g, ':')
+                              .replace(/；/g, ';');
+            } else if (mode === 'toFull') {
+                // 半形轉全形
+                output = input.replace(/[\u0021-\u007E]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0xfee0))
+                              .replace(/\u0020/g, '\u3000');
+            }
+
+            document.getElementById('outputText').value = output;
+        }
+
+        function autoConvert() {
+            convertWidth('toHalf');
+        }
+
+        function removeSpaces() {
+            const output = document.getElementById('outputText');
+            output.value = output.value.replace(/[ \t]+/g, ' ').trim();
+        }
+
+        function copyOutput() {
+            const text = document.getElementById('outputText').value;
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toastNotify');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+    </script>
+</body>
+</html>

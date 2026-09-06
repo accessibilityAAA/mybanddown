@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買便當 mybanddown｜台灣免費線上工具箱｜老師、上班族、學生都好用</title>
+    
+    <meta name="description" content="買便當 mybanddown 是免費線上工具平台，提供老師、上班族與學生常用的 PDF、圖片、計算、點名、倒數、QR Code、午餐決策與舒壓工具。免安裝、免註冊，支援手機與電腦。">
+    <meta name="keywords" content="買便當,mybanddown,線上工具,免費工具,老師工具,上班族工具,PDF工具,PDF合併,PDF壓縮,圖片馬賽克,隨機點名,隨機分組,倒數計時,計算機,QR Code,吃什麼,午餐轉盤">
+    <meta name="author" content="買便當 mybanddown">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ea580c">
+
+    <link rel="canonical" href="https://www.mybanddown.com/index.html">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
+
+    <!-- 🌟 直接引入 CSS，確保就算不經 JS 也能 100% 完美呈現樣式！ -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="js/components.js" defer></script>
+    <script src="js/fuse.js" defer></script>
+    <script src="js/hot-keywords.js"></script>
+    <script src="js/search-index.js"></script>
+    <script src="js/global-search.js" defer></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">跳過導覽選單，直接進入主要內容區</a>
+<div id="global-header"></div>
+
+<main class="main-container" id="main-content" tabindex="-1">
+  <section class="hero" aria-labelledby="page-title">
+    <div class="hero-inner">
+      <div class="eyebrow">🍱 免費・免安裝・本機處理</div>
+      <h1 id="page-title">買便當 <span>mybanddown</span></h1>
+      <p>老師、上班族、學生每天都用得到的免費線上工具箱。認真工作的時候幫你辦事，累的時候陪你偷懶。</p>
+
+      <div class="search-panel">
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔎</span>
+          <label for="site-search" class="visually-hidden">搜尋全站工具</label>
+          <input type="search" id="site-search" name="site-search"
+                 placeholder="搜尋工具，例如：PDF、點名、倒數、BMI、QR Code..."
+                 aria-label="搜尋全站工具"
+                 autocomplete="off" spellcheck="false"
+                 class="form-control"
+                 oninput="filterTools(this.value)">
+        </div>
+      </div>
+      <div id="search-status" class="search-status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <div class="category-shell">
+    <div class="category-tab-bar" id="categoryTabBar" role="tablist" aria-label="工具分類">
+      <button type="button" class="cat-tab-btn active" role="tab" aria-selected="true" onclick="switchCategory('all', this)">🔥 精選</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-teacher', this)">👨‍🏫 老師工具</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-office', this)">💼 辦公效率</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-pdf', this)">📄 PDF 文件</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-image', this)">🖼️ 圖片影音</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-calc', this)">🧮 計算工具</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-lunch', this)">🍱 今天吃什麼</button>
+      <button type="button" class="cat-tab-btn" role="tab" aria-selected="false" onclick="switchCategory('cat-game', this)">😮‍💨 舒壓小遊戲</button>
+    </div>
+  </div>
+
+  <section aria-labelledby="featured-title">
+    <div class="section-head">
+      <h2 id="featured-title">🔥 大家常用的工具</h2>
+      <p>打開就能用，不用註冊、不用安裝。</p>
+    </div>
+
+    <!-- 25 項 S 級實體工具展示 -->
+    <div class="tools-grid" id="tools-grid">
+
+      <article class="tool-block cat-lunch" data-search="轉盤 午餐 下午茶 決定器 菜單 吃什麼 外送 團購">
+        <div class="tool-icon-box" aria-hidden="true">🎡</div>
+        <div class="tool-content">
+          <a href="01-101-wheel.html" class="tool-title">午餐與下午茶決策幸運轉盤</a>
+          <div class="tool-desc">告別選擇困難！預載連鎖便當與熱門飲料店菜單轉盤。</div>
+          <div class="tag-group">
+            <a href="01-101-wheel.html" class="tag-btn">便當轉盤</a>
+            <a href="01-101-wheel.html" class="tag-btn">飲料轉盤</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-teacher" data-search="點名 隨機 抽籤 課堂 提問 學生 名單 座號">
+        <div class="tool-icon-box" aria-hidden="true">🎴</div>
+        <div class="tool-content">
+          <a href="01-102-random-picker.html" class="tool-title">課堂隨機點名抽籤與選人</a>
+          <div class="tool-desc">學生名單隨機抽選、提問與互動遊戲。</div>
+          <div class="tag-group">
+            <a href="01-102-random-picker.html" class="tag-btn">隨機點名</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-teacher" data-search="分組 團隊 隨機 公平 自動分組">
+        <div class="tool-icon-box" aria-hidden="true">👥</div>
+        <div class="tool-content">
+          <a href="01-103-random-group.html" class="tool-title">團隊公平隨機分組工具</a>
+          <div class="tool-desc">一鍵輸入人員名單，自動進行公平隨機分組。</div>
+          <div class="tag-group">
+            <a href="01-103-random-group.html" class="tag-btn">隨機分組</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-game" data-search="木魚 功德 舒壓 老闆來了 BossKey 氣泡紙 擲筊">
+        <div class="tool-icon-box" aria-hidden="true">🪵</div>
+        <div class="tool-content">
+          <a href="01-105-coin-dice.html" class="tool-title">微舒壓功德木魚與 BossKey</a>
+          <div class="tool-desc">敲木魚積功德、按壓氣泡紙，附一鍵偽裝按鍵！</div>
+          <div class="tag-group">
+            <a href="01-105-coin-dice.html" class="tag-btn">功德木魚</a>
+            <a href="01-105-coin-dice.html" class="tag-btn">氣泡紙</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-teacher" data-search="號碼 抽籤 亂數 號碼產生器 數字">
+        <div class="tool-icon-box" aria-hidden="true">🔢</div>
+        <div class="tool-content">
+          <a href="01-106-number-gen.html" class="tool-title">隨機亂數號碼抽籤器</a>
+          <div class="tool-desc">自訂數字範圍，重複或不重複抽取幸運號碼。</div>
+          <div class="tag-group">
+            <a href="01-106-number-gen.html" class="tag-btn">隨機號碼</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-teacher" data-search="恐龍 噪音 分貝 秩序 計時 音量 教室 課堂">
+        <div class="tool-icon-box" aria-hidden="true">🦖</div>
+        <div class="tool-content">
+          <a href="01-123-dino-noise.html" class="tool-title">課堂秩序分貝監控與恐龍計時</a>
+          <div class="tool-desc">可視化分貝儀與恐龍動畫，輕鬆控管課堂音量。</div>
+          <div class="tag-group">
+            <a href="01-123-dino-noise.html" class="tag-btn">分貝監控</a>
+            <a href="01-123-dino-noise.html" class="tag-btn">恐龍計時</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="字數 統計 中英文 分析 標點符號">
+        <div class="tool-icon-box" aria-hidden="true">📊</div>
+        <div class="tool-content">
+          <a href="02-201-char-count.html" class="tool-title">線上字數統計與中英文分析</a>
+          <div class="tool-desc">精準計算中英文字數、數字、標點符號與不含空白字數。</div>
+          <div class="tag-group">
+            <a href="02-201-char-count.html" class="tag-btn">字數統計</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="符號 顏文字 Emoji 複製 貼上 標點 單位">
+        <div class="tool-icon-box" aria-hidden="true">♟️</div>
+        <div class="tool-content">
+          <a href="02-202-symbols.html" class="tool-title">特殊符號顏文字一鍵複製大全</a>
+          <div class="tool-desc">收錄上千種箭頭、表情顏文字、單位與裝飾符號。</div>
+          <div class="tag-group">
+            <a href="02-202-symbols.html" class="tag-btn">特殊符號</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="IG 酷文字 藝術字體 草書 花體 雙線字 泡泡字">
+        <div class="tool-icon-box" aria-hidden="true">🔤</div>
+        <div class="tool-content">
+          <a href="02-203-fancy-text.html" class="tool-title">IG 酷文字與藝術字體生成器</a>
+          <div class="tool-desc">轉換草書、雙線字、圓圈黑底字與哥德體。</div>
+          <div class="tag-group">
+            <a href="02-203-fancy-text.html" class="tag-btn">IG 酷文字</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="條碼 產生器 QR Code 二維碼 WiFi 名片 網址">
+        <div class="tool-icon-box" aria-hidden="true">📷</div>
+        <div class="tool-content">
+          <a href="02-204-qrcode-gen.html" class="tool-title">線上高畫質 QR Code 產生器</a>
+          <div class="tool-desc">支援網址、Wi-Fi密碼、文字轉碼與高畫質 PNG 下載。</div>
+          <div class="tag-group">
+            <a href="02-204-qrcode-gen.html" class="tag-btn">QR Code</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="一維條碼 Barcode Code128 EAN13 Code39 UPC">
+        <div class="tool-icon-box" aria-hidden="true">║▌</div>
+        <div class="tool-content">
+          <a href="02-205-barcode-gen.html" class="tool-title">線上一維條碼 (Barcode) 產生器</a>
+          <div class="tool-desc">支援 Code 128、EAN-13、Code 39，商品物流必備。</div>
+          <div class="tag-group">
+            <a href="02-205-barcode-gen.html" class="tag-btn">一維條碼</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="全半形 轉換 繁簡 標點符號 數字 英文">
+        <div class="tool-icon-box" aria-hidden="true">🌗</div>
+        <div class="tool-content">
+          <a href="02-206-full-half-width.html" class="tool-title">全半形文字一鍵轉換器</a>
+          <div class="tool-desc">英文、數字與標點符號全半形極速雙向轉換。</div>
+          <div class="tag-group">
+            <a href="02-206-full-half-width.html" class="tag-btn">全半形轉換</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="假文 Lorem Ipsum 測試文字 排版 中文假字">
+        <div class="tool-icon-box" aria-hidden="true">📝</div>
+        <div class="tool-content">
+          <a href="02-210-lorem-ipsum.html" class="tool-title">中英文假字假文產生器</a>
+          <div class="tool-desc">支援繁體中文新聞/散文風與英文經典 Lorem Ipsum。</div>
+          <div class="tag-group">
+            <a href="02-210-lorem-ipsum.html" class="tag-btn">假文字</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-pdf" data-search="PDF 列印 併頁 身分證 拼版 2in1 4in1 影本">
+        <div class="tool-icon-box" aria-hidden="true">📄</div>
+        <div class="tool-content">
+          <a href="03-301-pdf-print-layout.html" class="tool-title">PDF 多頁併頁列印與拼版佈局</a>
+          <div class="tool-desc">支援 2in1、4in1 講義省紙拼版與身分證影本併頁。</div>
+          <div class="tag-group">
+            <a href="03-301-pdf-print-layout.html" class="tag-btn">PDF 併頁</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-pdf" data-search="PDF 合併 拆分 分割 提取頁碼 頁面">
+        <div class="tool-icon-box" aria-hidden="true">✂️</div>
+        <div class="tool-content">
+          <a href="03-302-pdf-merge-split.html" class="tool-title">PDF 合併與拆分分割工具</a>
+          <div class="tool-desc">多檔案順序合併，或自訂指定頁碼範圍抽出拆分。</div>
+          <div class="tag-group">
+            <a href="03-302-pdf-merge-split.html" class="tag-btn">PDF 合併拆分</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-pdf" data-search="PDF 壓縮 瘦身 報名 檔案縮小 品質">
+        <div class="tool-icon-box" aria-hidden="true">📉</div>
+        <div class="tool-content">
+          <a href="03-303-pdf-compress.html" class="tool-title">PDF 高品質極速壓縮與瘦身</a>
+          <div class="tool-desc">提供三段式壓縮，快速解決報名系統檔案限制。</div>
+          <div class="tag-group">
+            <a href="03-303-pdf-compress.html" class="tag-btn">PDF 壓縮</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-image" data-search="馬賽克 圖片 隱私 車牌 打碼 模糊 黑框">
+        <div class="tool-icon-box" aria-hidden="true">🖼️</div>
+        <div class="tool-content">
+          <a href="04-401-img-privacy.html" class="tool-title">圖片隱私保護馬賽克與打碼遮罩</a>
+          <div class="tool-desc">像素馬賽克、高斯模糊與黑框遮罩，保護敏感資訊。</div>
+          <div class="tag-group">
+            <a href="04-401-img-privacy.html" class="tag-btn">馬賽克打碼</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-image" data-search="圖片 裁切 縮放 旋轉 尺寸 翻轉">
+        <div class="tool-icon-box" aria-hidden="true">✂️</div>
+        <div class="tool-content">
+          <a href="04-402-img-editor.html" class="tool-title">圖片裁切縮放與尺寸修改工具</a>
+          <div class="tool-desc">常用比例鎖定裁切、旋轉、鏡像與等比例尺寸修改。</div>
+          <div class="tag-group">
+            <a href="04-402-img-editor.html" class="tag-btn">尺寸修改</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-image" data-search="證件照 去背 換底色 大頭照 白底 藍底 紅底">
+        <div class="tool-icon-box" aria-hidden="true">👤</div>
+        <div class="tool-content">
+          <a href="04-403-id-photo.html" class="tool-title">證件照製作與一鍵背景換色</a>
+          <div class="tool-desc">自動去背、白底/藍底/紅底換色與標準證件照裁切。</div>
+          <div class="tag-group">
+            <a href="04-403-id-photo.html" class="tag-btn">證件照換底</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-calc" data-search="單位 換算 坪數 長度 重量 溫度 容量 面積">
+        <div class="tool-icon-box" aria-hidden="true">📏</div>
+        <div class="tool-content">
+          <a href="05-501-unit-converter.html" class="tool-title">多功能工程與日常單位換算器</a>
+          <div class="tool-desc">長度、重量、坪數、溫度、體積與資料容量雙向換算。</div>
+          <div class="tag-group">
+            <a href="05-501-unit-converter.html" class="tag-btn">萬用單位換算</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-calc" data-search="BMI BMR TDEE 熱量 減脂 增肌 體重 基礎代謝">
+        <div class="tool-icon-box" aria-hidden="true">🏋️</div>
+        <div class="tool-content">
+          <a href="05-502-bmi-bmr.html" class="tool-title">BMI / BMR / TDEE 每日熱量計算</a>
+          <div class="tool-desc">計算身體質量指數、基礎代謝率與減脂/增肌卡路里。</div>
+          <div class="tag-group">
+            <a href="05-502-bmi-bmr.html" class="tag-btn">TDEE 熱量</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-calc" data-search="房貸 試算 本息均償 本金均償 寬限期 利率 買房">
+        <div class="tool-icon-box" aria-hidden="true">🏠</div>
+        <div class="tool-content">
+          <a href="05-503-mortgage-calc.html" class="tool-title">房貸試算與本息本金均償試算器</a>
+          <div class="tool-desc">計算每月房貸負擔、寬限期與本息/本金均償利息比較。</div>
+          <div class="tag-group">
+            <a href="05-503-mortgage-calc.html" class="tag-btn">房貸試算</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-office" data-search="密碼 亂數 產生器 高強度 防駭 混淆 亂數密碼">
+        <div class="tool-icon-box" aria-hidden="true">🔐</div>
+        <div class="tool-content">
+          <a href="05-504-pass-gen.html" class="tool-title">高強度安全密碼產生器</a>
+          <div class="tool-desc">密碼學級別隨機數，可自訂長度、符號與排除混淆字元。</div>
+          <div class="tag-group">
+            <a href="05-504-pass-gen.html" class="tag-btn">安全密碼</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-calc" data-search="發票 對獎 統一發票 末三碼 獎金 扣稅">
+        <div class="tool-icon-box" aria-hidden="true">🧾</div>
+        <div class="tool-content">
+          <a href="05-505-invoice-winning.html" class="tool-title">線上統一發票對獎與獎金試算</a>
+          <div class="tool-desc">末 3 碼極速對獎、千萬特別獎、頭獎與實領金額扣稅計算。</div>
+          <div class="tag-group">
+            <a href="05-505-invoice-winning.html" class="tag-btn">發票對獎</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-block cat-teacher cat-office" data-search="分貝 噪音 測音量 麥克風 即時 監測">
+        <div class="tool-icon-box" aria-hidden="true">🎙️</div>
+        <div class="tool-content">
+          <a href="05-506-noise-meter.html" class="tool-title">線上分貝計與環境噪音監測儀</a>
+          <div class="tool-desc">麥克風實時收音、測量環境 dBA 分貝、平均值與最高峰值。</div>
+          <div class="tag-group">
+            <a href="05-506-noise-meter.html" class="tag-btn">環境分貝計</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div id="no-result" style="display: none; padding:2rem; text-align:center; font-size:1.1rem; font-weight:bold;">🔍 找不到相關工具。試試「PDF」、「點名」、「倒數」、「圖片」、「計算」等關鍵字。</div>
+
+</main>
+
+<div id="global-footer"></div>
+
+<script>
+function switchCategory(catClass, btn) {
+  const mainSearch = document.getElementById('site-search');
+  if (mainSearch) mainSearch.value = '';
+
+  document.querySelectorAll('.cat-tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  if (btn) {
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+  }
+
+  const blocks = document.querySelectorAll('#tools-grid > .tool-block');
+  let visibleCount = 0;
+
+  blocks.forEach(block => {
+    const show = (catClass === 'all' || block.classList.contains(catClass));
+    block.style.display = show ? 'flex' : 'none';
+    if (show) visibleCount++;
+  });
+
+  const noResult = document.getElementById('no-result');
+  if (noResult) noResult.style.display = 'none';
+
+  const status = document.getElementById('search-status');
+  if (status) status.textContent = visibleCount + ' 個精選工具';
+}
+
+function filterTools(query) {
+  const q = query.trim().toLowerCase();
+  const mainBlocks = document.querySelectorAll('#tools-grid > .tool-block');
+  let matchMainCount = 0;
+
+  if (q) {
+    document.querySelectorAll('.cat-tab-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    const firstTab = document.querySelector('.cat-tab-btn');
+    if (firstTab) firstTab.classList.add('active');
+  }
+
+  mainBlocks.forEach(block => {
+    const data = ((block.dataset.search || '') + ' ' + (block.innerText || '')).toLowerCase();
+    const show = !q || data.includes(q);
+    block.style.display = show ? 'flex' : 'none';
+    if (show && q) matchMainCount++;
+  });
+
+  const noResult = document.getElementById('no-result');
+  if (noResult) {
+    noResult.style.display = (q && matchMainCount === 0) ? 'block' : 'none';
+  }
+
+  const status = document.getElementById('search-status');
+  if (status) {
+    status.textContent = q ? (matchMainCount > 0 ? ('🔍 找到 ' + matchMainCount + ' 個相關工具') : '❌ 查無工具') : '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const firstTab = document.querySelector('.cat-tab-btn.active');
+  if (firstTab) switchCategory('all', firstTab);
+});
+</script>
+</body>
+</html>
